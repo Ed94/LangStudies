@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Parser"
-run/main_scene="res://Lecture.2.tscn"
+run/main_scene="res://Lecture.3.tscn"
 boot_splash/image="res://Branding/RDP_Class_cover_small.png"
 config/icon="res://Branding/RDP_Class_cover_small.png"
 
