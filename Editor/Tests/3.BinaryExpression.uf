@@ -1,0 +1,7 @@
+// Binary expression
+2 + 2;
+
+// Nested binary expressions:
+// left : 3 + 2
+// right : 2
+3 + 2 - 2;

@@ -8,22 +8,17 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "Reference",
-"class": "JSONBeautifier",
-"language": "GDScript",
-"path": "res://ThirdParty/json_beautifier.gd"
-} ]
-_global_script_class_icons={
-"JSONBeautifier": ""
-}
-
 [application]
 
 config/name="Parser"
-run/main_scene="res://Lecture.3.tscn"
-boot_splash/image="res://Branding/RDP_Class_cover_small.png"
-config/icon="res://Branding/RDP_Class_cover_small.png"
+run/main_scene="res://Persistent.tscn"
+boot_splash/image="res://Assets/Branding/RDP_Class_cover_small.png"
+config/icon="res://Assets/Branding/RDP_Class_cover_small.png"
+
+[autoload]
+
+GScene="*res://Lectures/Lecture.tscn"
+GScript="*res://Lectures/Lecture.6.gd"
 
 [gui]
 

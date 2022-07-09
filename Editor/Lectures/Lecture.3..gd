@@ -1,21 +1,32 @@
 extends Node
 
-const JsonBeautifier = preload("res://ThirdParty/json_beautifier.gd")
-
 # This closesly follows the source provided in the lectures.
 # Later on after the lectures are complete or when I deem
 # Necessary there will be heavy refactors.
 
-enum TokenTypes \
+const TokenType = \
 {
-	Token_Number,
-	Token_String
+	Program    = "Program",
+	
+	# Comments
+	CommentLine      = "CommentLine",
+	CommentMultiLine = "CommentMultiLine",
+	
+	# Formatting
+	Whitespace = "Whitespace",
+	
+	# Literals
+	Number     = "Number",
+	String     = "String"
 }
 
-const StrTokenTypes = \
+const TokenSpec = \
 {
-	Token_Number = "Number",
-	Token_String = "String"
+	TokenType.CommentLine      : "^\/\/.*",
+	TokenType.CommentMultiLine : "^\/\\*[\\s\\S]*?\\*\/",
+	TokenType.Whitespace       : "^\\s+",
+	TokenType.Number           : "\\d+",
+	TokenType.String           : "^\"[^\"]*\""
 }
 
 class Token:
@@ -44,36 +55,38 @@ class Tokenizer:
 		if self.reached_EndOfTxt() == true :
 			return null
 			
-		var token = self.SrcTxt.substr(Cursor)
+		var srcLeft = self.SrcTxt.substr(Cursor)
+		var regex   = RegEx.new()
+		var token   = Token.new()
 		
-		# Numbers
-		if token[self.Cursor].is_valid_integer() :
-			var \
-			numberTok       = Token.new()
-			numberTok.Type  = "Number"
-			numberTok.Value = ""
-	
-			while token.length() > self.Cursor && token[self.Cursor].is_valid_integer() :
-				numberTok.Value += token[self.Cursor]
-				self.Cursor     += 1
+		for type in TokenSpec :
+			regex.compile(TokenSpec[type])
+			
+			var result = regex.search(srcLeft)
+			if  result == null :
+				continue
 				
-			return numberTok
-
-		# String:
-		if token[self.Cursor] == '"' :
-			var \
-			stringTok       = Token.new()
-			stringTok.Type  = "String"
-			stringTok.Value = "\""	
+			# Skip Comments
+			if type == TokenType.CommentLine || type == TokenType.CommentMultiLine :
+				self.Cursor += result.get_string().length()
+				return next_Token()
+				
+			# Skip Whitespace
+			if type == TokenType.Whitespace :
+				var addVal = result.get_string().length()
+				self.Cursor += addVal
+				
+				return next_Token()
+				
+			token.Type   = type
+			token.Value  = result.get_string()
+			self.Cursor += ( result.get_string().length() -1 )
+				
+			return token
 			
-			self.Cursor += 1
-			
-			while token.length() > self.Cursor :
-				stringTok.Value += token[self.Cursor]
-				self.Cursor     += 1
-			
-			return stringTok
-		
+		var assertStrTmplt = "next_token: Source text not understood by tokenizer at Cursor pos: {value}"
+		var assertStr      = assertStrTmplt.format({"value" : self.Cursor})
+		assert(true != true, assertStr)
 		return null
 	
 	func reached_EndOfTxt():
@@ -130,9 +143,9 @@ class Parser:
 	#	;
 	func parse_Literal():
 		match self.NextToken.Type :
-			"Number":
+			TokenType.Number:
 				return parse_NumericLiteral()
-			"String":
+			TokenType.String:
 				return parse_StringLiteral()
 				
 		assert(false, "parse_Literal: Was not able to detect valid literal type from NextToken")
@@ -142,10 +155,10 @@ class Parser:
 	#	;
 	#
 	func parse_NumericLiteral():
-		var Token = self.eat("Number")
+		var Token = self.eat(TokenType.Number)
 		var \
 		node       = SyntaxNode.new()
-		node.Type  = "NumericLiteral"
+		node.Type  = TokenType.Number
 		node.Value = int( Token.Value )
 		
 		return node
@@ -155,10 +168,10 @@ class Parser:
 	#	;
 	#
 	func parse_StringLiteral():
-		var Token = self.eat("String")
+		var Token = self.eat(TokenType.String)
 		var \
 		node = SyntaxNode.new()
-		node.Type  = "StringLiteral"
+		node.Type  = TokenType.String
 		node.Value = Token.Value.substr( 1, Token.Value.length() - 2 )
 
 		return node
@@ -170,7 +183,7 @@ class Parser:
 	func parse_Program():
 		var \
 		node      = ProgramNode.new()
-		node.Type = "Program"
+		node.Type = TokenType.Program
 		node.Body = parse_Literal()
 		
 		return node
@@ -186,23 +199,62 @@ class Parser:
 var GParser = Parser.new()
 
 
+var ProgramDescription : String
+
+func test():
+	GTokenizer.init(ProgramDescription)
+	
+	var ast = GParser.parse(GTokenizer)
+	
+	print(JSON.print(ast.toDict(), "\t"))
+	
 
 # Main Entry point.
 func _ready():
 	# Numerical test
-	var ProgramDescription = "47"
-	GTokenizer.init(ProgramDescription)
-	
-	var ast = GParser.parse(GTokenizer)
-	print(JsonBeautifier.beautify_json(to_json(ast.toDict())))
+	ProgramDescription = "47"
+	test()
 	
 	# String Test
 	ProgramDescription = "\"hello\""
-	GTokenizer.init(ProgramDescription)
-	
-	ast = GParser.parse(GTokenizer)
-	print(JsonBeautifier.beautify_json(to_json(ast.toDict())))
+	test()
 
+	# Whitespace test
+	ProgramDescription = "     \"we got past whitespace\"       "
+	test()
+	
+	# Comment Single Test
+	ProgramDescription = \
+	"""
+	// Testing a comment    
+	\"hello sir\"       
+	"""
+	test()
+	
+	# Comment Multi-Line Test
+	ProgramDescription = \
+	"""
+	/**
+	*
+	* Testing a comment    
+	*/
+	\"may I have some grapes\"       
+	"""
+	test()
+	
+	# Multi-statement test
+	ProgramDescription = \
+	"""
+	// Testing a comment    
+	\"hello sir\";
+	
+	/**
+	*
+	* Testing a comment    
+	*/
+	\"may I have some grapes\";    
+	"""
+	test()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

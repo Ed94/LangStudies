@@ -1,5 +1,3 @@
-cd Engine\gd\bin\
+start Engine\gd\bin\godot.windows.tools.64.exe -e Editor/project.godot
 
-start godot.windows.tools.64.exe
 
-exit

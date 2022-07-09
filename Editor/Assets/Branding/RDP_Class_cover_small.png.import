@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/RDP_Class_cover_small.png-51d9e4e36c8441da2486970409e2a06b.stex"
+path="res://.import/RDP_Class_cover_small.png-ab70c489e9b3c0feb8bbeb581c2176f1.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Branding/RDP_Class_cover_small.png"
-dest_files=[ "res://.import/RDP_Class_cover_small.png-51d9e4e36c8441da2486970409e2a06b.stex" ]
+source_file="res://Assets/Branding/RDP_Class_cover_small.png"
+dest_files=[ "res://.import/RDP_Class_cover_small.png-ab70c489e9b3c0feb8bbeb581c2176f1.stex" ]
 
 [params]
 

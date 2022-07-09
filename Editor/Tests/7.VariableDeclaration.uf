@@ -1,0 +1,8 @@
+// Declaration
+let x;
+
+// Single assignment declaration
+let y = 42;
+
+// Multiple declarations
+let a, b;

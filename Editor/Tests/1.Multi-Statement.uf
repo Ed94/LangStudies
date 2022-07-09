@@ -1,0 +1,8 @@
+// Testing a comment    
+"Hello World!";
+
+/**
+*
+* Testing a comment    
+*/
+42;

@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Assets/Styles/EditorTheme.tres" type="Theme" id=1]
+[ext_resource path="res://Assets/Branding/RDP_Class_cover_small.png" type="Texture" id=2]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="CourseBrand" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 2 )
+expand = true
+stretch_mode = 6
+
+[node name="TextOutput" type="TextEdit" parent="."]
+anchor_left = 0.25
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+theme = ExtResource( 1 )
+readonly = true
+highlight_current_line = true
+show_line_numbers = true
+minimap_draw = true

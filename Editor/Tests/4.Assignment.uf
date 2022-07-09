@@ -1,0 +1,5 @@
+// Single
+x = 42;
+
+// Chained
+x = (y = 42);

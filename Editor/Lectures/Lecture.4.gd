@@ -1,7 +1,5 @@
 extends Node
 
-const JsonBeautifier = preload("res://ThirdParty/json_beautifier.gd")
-
 # This closesly follows the source provided in the lectures.
 # Later on after the lectures are complete or when I deem
 # Necessary there will be heavy refactors.
@@ -17,6 +15,9 @@ const TokenType = \
 	# Formatting
 	Whitespace = "Whitespace",
 	
+	# Statements
+	StatementEnd = "StatementEnd",
+	
 	# Literals
 	Number     = "Number",
 	String     = "String"
@@ -28,7 +29,8 @@ const TokenSpec = \
 	TokenType.CommentMultiLine : "^\/\\*[\\s\\S]*?\\*\/",
 	TokenType.Whitespace       : "^\\s+",
 	TokenType.Number           : "\\d+",
-	TokenType.String           : "^\"[^\"]*\""
+	TokenType.String           : "^\"[^\"]*\"",
+	TokenType.StatementEnd     : "^;"
 }
 
 class Token:
@@ -65,7 +67,7 @@ class Tokenizer:
 			regex.compile(TokenSpec[type])
 			
 			var result = regex.search(srcLeft)
-			if  result == null :
+			if  result == null || result.get_start() != 0 :
 				continue
 				
 			# Skip Comments
@@ -82,7 +84,7 @@ class Tokenizer:
 				
 			token.Type   = type
 			token.Value  = result.get_string()
-			self.Cursor += ( result.get_string().length() -1 )
+			self.Cursor += ( result.get_string().length() )
 				
 			return token
 			
@@ -97,15 +99,32 @@ class Tokenizer:
 var GTokenizer = Tokenizer.new()
 
 
+const SyntaxNodeType = \
+{
+	NumericLiteral      = "NumericLiteral",
+	StringLiteral       = "StringLiteral",
+	ExpressionStatement = "ExpressionStatement"
+}
+
 class SyntaxNode:
 	var Type  : String
 	var Value # Not specifing a type implicity declares a Variant type.
 	
 	func toDict():
+		var ValueDict = self.Value
+		if typeof(Value) == TYPE_ARRAY :
+			var dict  = {}
+			var index = 0
+			for entry in self.Value :
+				dict[index]  = entry.toDict()
+				index       += 1
+				
+			ValueDict = dict
+		
 		var result = \
 		{ 
 			Type  = self.Type,
-			Value = self.Value
+			Value = ValueDict
 		}
 		return result
 
@@ -143,8 +162,9 @@ class Parser:
 	#	: NumericLiteral
 	#	: StringLiteral
 	#	;
+	#
 	func parse_Literal():
-		match self.NextToken.Type :
+		match NextToken.Type :
 			TokenType.Number:
 				return parse_NumericLiteral()
 			TokenType.String:
@@ -157,10 +177,10 @@ class Parser:
 	#	;
 	#
 	func parse_NumericLiteral():
-		var Token = self.eat(TokenType.Number)
+		var Token = eat(TokenType.Number)
 		var \
 		node       = SyntaxNode.new()
-		node.Type  = TokenType.Number
+		node.Type  = SyntaxNodeType.NumericLiteral
 		node.Value = int( Token.Value )
 		
 		return node
@@ -170,15 +190,63 @@ class Parser:
 	#	;
 	#
 	func parse_StringLiteral():
-		var Token = self.eat(TokenType.String)
+		var Token = eat(TokenType.String)
 		var \
 		node = SyntaxNode.new()
-		node.Type  = TokenType.String
+		node.Type  = SyntaxNodeType.StringLiteral
 		node.Value = Token.Value.substr( 1, Token.Value.length() - 2 )
 
 		return node
 	
+	# Expression
+	#	: Literal
+	#	;
+	#	
+	func parse_Expression():
+		return parse_Literal()
+		
+	# ExpressionStatement
+	#	: Expression
+	#	;
+	#
+	func parse_ExpressionStatement():
+		var expression = parse_Expression()
+		eat(TokenType.StatementEnd)
+		
+		var \
+		node       = SyntaxNode.new()
+		node.Type  = SyntaxNodeType.ExpressionStatement
+		node.Value = expression
+		
+		return expression
+		
+	# Statement
+	# 	: ExpressionStatement
+	#	;
+	#
+	func parse_Statement():
+		return parse_ExpressionStatement()
+	
+	# StatementList
+	#	: Statement
+	#	| StatementList Statement -> Statement ...
+	#	;
+	#
+	func parse_StatementList():
+		var statementList = [ parse_Statement() ]
+		
+		while NextToken != null :
+			statementList.append( parse_Statement() )
+			
+		var \
+		node       = SyntaxNode.new()
+		node.Type  = "StatementList"
+		node.Value = statementList
+		
+		return node
+	
 	# Program
+	#	: StatementList
 	# 	: Literal
 	#	;
 	#
@@ -186,7 +254,7 @@ class Parser:
 		var \
 		node      = ProgramNode.new()
 		node.Type = TokenType.Program
-		node.Body = parse_Literal()
+		node.Body = parse_StatementList()
 		
 		return node
 
@@ -200,67 +268,40 @@ class Parser:
 
 var GParser = Parser.new()
 
+const Tests = \
+{
+	MultiStatement = \
+	{
+		Name = "Multi-Statement",
+		File = "1.Multi-Statement.uf"
+	}
+}
 
-var ProgramDescription : String
-
-func test():
-	GTokenizer.init(ProgramDescription)
+func test(entry):
+	var introMessage          = "Testing: {Name}"
+	var introMessageFormatted = introMessage.format({"Name" : entry.Name})
+	print(introMessageFormatted)
 	
+	var path          = "res://Tests/{TestName}"
+	var pathFormatted = path.format({"TestName" : entry.File})
+	
+	var \
+	file = File.new()
+	file.open(pathFormatted, File.READ)
+	
+	var programDescription = file.get_as_text()
+	file.close()
+	
+	GTokenizer.init(programDescription)
 	var ast = GParser.parse(GTokenizer)
 	
-	print(JsonBeautifier.beautify_json(to_json(ast.toDict())))
+	var json = JSON.print(ast.toDict(), "\t")
+	
+	print(JSON.print(ast.toDict(), "\t"))
+	print("Passed!\n")
 	
 
 # Main Entry point.
 func _ready():
-	# Numerical test
-	ProgramDescription = "47"
-	test()
-	
-	# String Test
-	ProgramDescription = "\"hello\""
-	test()
-
-	# Whitespace test
-	ProgramDescription = "     \"we got past whitespace\"       "
-	test()
-	
-	# Comment Single Test
-	ProgramDescription = \
-	"""
-	// Testing a comment    
-	\"hello sir\"       
-	"""
-	test()
-	
-	# Comment Multi-Line Test
-	ProgramDescription = \
-	"""
-	/**
-	*
-	* Testing a comment    
-	*/
-	\"may I have some grapes\"       
-	"""
-	test()
-	
-	# Multi-statement test
-	ProgramDescription = \
-	"""
-	// Testing a comment    
-	\"hello sir\";
-	
-	/**
-	*
-	* Testing a comment    
-	*/
-	\"may I have some grapes\";    
-	"""
-	test()
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-
-
-
+	for Key in Tests :
+		test(Tests[Key])
