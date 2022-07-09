@@ -30,4 +30,9 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
+quality/intended_usage/framebuffer_allocation=0
+quality/intended_usage/framebuffer_allocation.mobile=0
+quality/shadows/filter_mode=2
+quality/shadows/filter_mode.mobile=2
+quality/filters/msaa=1
 environment/default_environment="res://default_env.tres"

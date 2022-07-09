@@ -282,7 +282,11 @@ func test(entry):
 	var introMessageFormatted = introMessage.format({"Name" : entry.Name})
 	print(introMessageFormatted)
 	
-	var path          = "res://Tests/{TestName}"
+	var path
+	if  Engine.editor_hint() :
+		path          = "res://Tests/{TestName}"	
+	else :
+		path          = "res://../Builds/Tests/{TestName}"
 	var pathFormatted = path.format({"TestName" : entry.File})
 	
 	var \
