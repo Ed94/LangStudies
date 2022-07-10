@@ -6,7 +6,7 @@ extends Node
 
 const TokenType = \
 {
-	Program = "Program",
+	Program    = "Program",
 	
 	# Comments
 	CommentLine      = "CommentLine",
@@ -14,6 +14,15 @@ const TokenType = \
 	
 	# Formatting
 	Whitespace = "Whitespace",
+
+	# Expressions
+
+	ExpressionPStart  = "Expresssion Parenthesis Start",
+	ExpressionPEnd	  = "Expression Parenthesis End",
+
+	# Arithmetic
+	AdditiveOp       = "AdditiveOperator",
+	MultiplicativeOp = "MultiplicativeOperator",
 	
 	# Statements
 	StatementEnd   = "StatementEnd",
@@ -21,20 +30,35 @@ const TokenType = \
 	StmtBlockEnd   = "BlockStatementEnd",
 	
 	# Literals
-	Number = "Number",
-	String = "String"
+	Number     = "Number",
+	String     = "String"
 }
 
 const TokenSpec = \
 {
+	# Comments
 	TokenType.CommentLine      : "^\/\/.*",
 	TokenType.CommentMultiLine : "^\/\\*[\\s\\S]*?\\*\/",
-	TokenType.Whitespace       : "^\\s+",
-	TokenType.Number           : "\\d+",
-	TokenType.String           : "^\"[^\"]*\"",
-	TokenType.StatementEnd     : "^;",
-	TokenType.StmtBlockStart   : "^{",
-	TokenType.StmtBlockEnd     : "^}"
+
+	# Formatting
+	TokenType.Whitespace : "^\\s+",
+	
+	# Expressions
+	TokenType.ExpressionPStart : "^\\(",
+	TokenType.ExpressionPEnd   : "^\\)",
+
+	# Arithmetic
+	TokenType.AdditiveOp       : "^[+\\-]",
+	TokenType.MultiplicativeOp : "^[*\\/]",
+
+	# Literal
+	TokenType.Number : "\\d+",
+	TokenType.String : "^\"[^\"]*\"",
+
+	# Statements
+	TokenType.StatementEnd   : "^;",
+	TokenType.StmtBlockStart : "^{",
+	TokenType.StmtBlockEnd   : "^}"
 }
 
 class Token:
@@ -60,10 +84,10 @@ class Tokenizer:
 	
 	# Provides the next token in the source text.
 	func next_Token():
-		if self.reached_EndOfTxt() == true :
+		if reached_EndOfTxt() == true :
 			return null
 			
-		var srcLeft = self.SrcTxt.substr(Cursor)
+		var srcLeft = SrcTxt.substr(Cursor)
 		var regex   = RegEx.new()
 		var token   = Token.new()
 		
@@ -76,30 +100,30 @@ class Tokenizer:
 				
 			# Skip Comments
 			if type == TokenType.CommentLine || type == TokenType.CommentMultiLine :
-				self.Cursor += result.get_string().length()
+				Cursor += result.get_string().length()
 				return next_Token()
 				
 			# Skip Whitespace
 			if type == TokenType.Whitespace :
 				var addVal   = result.get_string().length()
-				self.Cursor += addVal
+				Cursor += addVal
 				
 				return next_Token()
 				
 			token.Type   = type
 			token.Value  = result.get_string()
-			self.Cursor += ( result.get_string().length() )
+			Cursor      += ( result.get_string().length() )
 				
 			return token
 			
 		var assertStrTmplt = "next_token: Source text not understood by tokenizer at Cursor pos: {value}"
-		var assertStr      = assertStrTmplt.format({"value" : self.Cursor})
+		var assertStr      = assertStrTmplt.format({"value" : Cursor})
 		assert(true != true, assertStr)
 		return null
 	
 	func reached_EndOfTxt():
-		return self.Cursor >= ( self.SrcTxt.length() )
-		
+		return Cursor >= ( SrcTxt.length() )
+
 var GTokenizer = Tokenizer.new()
 
 
@@ -112,11 +136,13 @@ const AST_Format = \
 
 const SyntaxNodeType = \
 {
-	NumericLiteral      = "NumericLiteral",
-	StringLiteral       = "StringLiteral",
-	ExpressionStatement = "ExpressionStatement",
-	BlockStatement      = "BlockStatement",
-	EmptyStatement      = "EmptyStatement"
+	NumericLiteral           = "NumericLiteral",
+	StringLiteral            = "StringLiteral",
+	ExpressionStatement      = "ExpressionStatement",
+	BlockStatement           = "BlockStatement",
+	EmptyStatement           = "EmptyStatement",
+	BinaryExpression         = "BinaryExpression",
+	# MultiplicativeExpression = "MultiplicativeExpression"
 }
 
 class SyntaxNode:
@@ -129,7 +155,10 @@ class SyntaxNode:
 		if typeof(Value) == TYPE_ARRAY :
 			var array = []
 			for entry in self.Value :
-				array.append( entry.to_SExpression() )
+				if typeof(entry) == TYPE_OBJECT :
+					array.append( entry.to_SExpression() )
+				else :
+					array.append( entry )
 			
 			expression.append(array)
 			return expression
@@ -145,7 +174,11 @@ class SyntaxNode:
 		if typeof(Value) == TYPE_ARRAY :
 			var array = []
 			for entry in self.Value :
-				array.append(entry.to_Dictionary())
+				if typeof(entry) == TYPE_OBJECT :
+					array.append( entry.to_Dictionary() )
+				else :
+					array.append( entry )
+					
 			var result = \
 			{
 				Type  = self.Type,
@@ -182,7 +215,7 @@ class Parser:
 		
 		assert(currToken.Type == tokenType, assertStr)
 		
-		self.NextToken = self.TokenizerRef.next_Token()
+		NextToken = TokenizerRef.next_Token()
 		
 		return currToken
 	
@@ -190,7 +223,6 @@ class Parser:
 	#	: NumericLiteral
 	#	: StringLiteral
 	#	;
-	#
 	func parse_Literal():
 		match NextToken.Type :
 			TokenType.Number:
@@ -203,7 +235,6 @@ class Parser:
 	# NumericLiteral
 	#	: Number
 	#	;
-	#
 	func parse_NumericLiteral():
 		var Token = eat(TokenType.Number)
 		var \
@@ -216,7 +247,6 @@ class Parser:
 	# StringLiteral
 	#	: String
 	#	;
-	#
 	func parse_StringLiteral():
 		var Token = eat(TokenType.String)
 		var \
@@ -225,17 +255,86 @@ class Parser:
 		node.Value = Token.Value.substr( 1, Token.Value.length() - 2 )
 
 		return node
+
+	# ParenthesizedExpression
+	#	: ( Expression )
+	#	;
+	func parse_ParenthesizedExpression():
+		eat(TokenType.ExpressionPStart)
+
+		var expression = parse_Expression()
+
+		eat(TokenType.ExpressionPEnd)
+
+		return expression
+
+	# PrimaryExpression
+	#	: Literal
+	#	| ParenthesizedExpression
+	#	;
+	func parse_PrimaryExpression():
+		match NextToken.Type:
+			TokenType.ExpressionPStart:
+				return parse_ParenthesizedExpression()
+
+		return parse_Literal()
+
+	# MultiplicativeExpression
+	#	: PrimaryExpression
+	#	: MultiplicativeExpression MultiplicativeOp PrimaryExpression -> PrimaryExpression MultiplicativeOp ... Literal
+	#	;
+	func parse_MultiplicativeExpression():
+		var \
+		parseFn = FuncRef.new()
+		parseFn.set_instance(self)
+		parseFn.set_function("parse_PrimaryExpression")
+
+		return parse_BinaryExpression(parseFn, TokenType.MultiplicativeOp)
+
+	# AdditiveExpression
+	#	: MultiplicativeExpression
+	#	| AdditiveExpression AdditiveOp MultiplicativeExpression -> MultiplicativeExpression AdditiveOp ... Literal
+	#	;
+	func parse_AdditiveExpression():
+		var \
+		parseFn = FuncRef.new()
+		parseFn.set_instance(self)
+		parseFn.set_function("parse_MultiplicativeExpression")
+
+		return parse_BinaryExpression(parseFn, TokenType.AdditiveOp)
+
+	# BinaryExpression
+	#	: MultiplicativeExpression
+	#	| AdditiveExpression
+	#	;
+	func parse_BinaryExpression(parse_fn, operatorToken):
+		var left = parse_fn.call_func()
+		
+		while NextToken.Type == operatorToken:
+			var operator = eat(operatorToken)
+			var right    = parse_fn.call_func()
+
+			var \
+			nestedNode       = SyntaxNode.new()
+			nestedNode.Type  = SyntaxNodeType.BinaryExpression
+			nestedNode.Value = []
+			nestedNode.Value.append(operator.Value)
+			nestedNode.Value.append(left)
+			nestedNode.Value.append(right)
+
+			left = nestedNode;
+		
+		return left
 	
 	# Expression
 	#	: Literal
+	#	: AdditiveExpression
 	#	;
-	#	
 	func parse_Expression():
-		return parse_Literal()
+		return parse_AdditiveExpression()
 		
 	# EmptyStatement
 	#	;
-	#
 	func parse_EmptyStatement():
 		eat(TokenType.StatementEnd)
 	
@@ -248,7 +347,6 @@ class Parser:
 	# BlockStatement
 	#	: { OptStatementList }
 	#	;
-	#
 	func parse_BlockStatement():
 		eat(TokenType.StmtBlockStart)
 
@@ -268,7 +366,6 @@ class Parser:
 	# ExpressionStatement
 	#	: Expression
 	#	;
-	#
 	func parse_ExpressionStatement():
 		var expression = parse_Expression()
 		eat(TokenType.StatementEnd)
@@ -285,7 +382,6 @@ class Parser:
 	#	: BlockStatement
 	#	: EmptyStatement
 	#	;
-	#
 	func parse_Statement():
 		match NextToken.Type :
 			TokenType.StatementEnd :
@@ -299,7 +395,6 @@ class Parser:
 	#	: Statement
 	#	| StatementList Statement -> Statement ...
 	#	;
-	#
 	func parse_StatementList(endToken):
 		var statementList = [ parse_Statement() ]
 		
@@ -312,7 +407,6 @@ class Parser:
 	#	: StatementList
 	# 	: Literal
 	#	;
-	#
 	func parse_Program():
 		var \
 		node       = SyntaxNode.new()
@@ -340,15 +434,20 @@ func tout(text):
 
 const Tests = \
 {
-	MultiStatement = \
+	# MultiStatement = \
+	# {
+	# 	Name = "Multi-Statement",
+	# 	File = "1.Multi-Statement.uf"
+	# },
+	# BlockStatement = \
+	# {
+	# 	Name = "Block Statement",
+	# 	File = "2.BlockStatement.uf"
+	# },
+	BinaryExpression = \
 	{
-		Name = "Multi-Statement",
-		File = "1.Multi-Statement.uf"
-	},
-	BlockStatement = \
-	{
-		Name = "Block Statement",
-		File = "2.BlockStatement.uf"
+		Name = "Binary Expression",
+		File = "3.BinaryExpression.uf"
 	}
 }
 
@@ -378,7 +477,7 @@ func test(entry):
 	
 	tout(json + "\n")
 	tout("Passed!\n")
-	
+
 
 # Main Entry point.
 func _ready():
