@@ -21,8 +21,10 @@ const TokenType = \
 	ExpressionPEnd	  = "Expression Parenthesis End",
 
 	# Arithmetic
-	AdditiveOp       = "AdditiveOperator",
-	MultiplicativeOp = "MultiplicativeOperator",
+	ComplexAssignment = "ComplexAssignment",
+	Assignment        = "Assignment",
+	AdditiveOp        = "AdditiveOperator",
+	MultiplicativeOp  = "MultiplicativeOperator",
 	
 	# Statements
 	StatementEnd   = "StatementEnd",
@@ -31,7 +33,10 @@ const TokenType = \
 	
 	# Literals
 	Number     = "Number",
-	String     = "String"
+	String     = "String",
+
+	# Symbols
+	Identifier = "Identifier"
 }
 
 const TokenSpec = \
@@ -48,8 +53,10 @@ const TokenSpec = \
 	TokenType.ExpressionPEnd   : "^\\)",
 
 	# Arithmetic
-	TokenType.AdditiveOp       : "^[+\\-]",
-	TokenType.MultiplicativeOp : "^[*\\/]",
+	TokenType.ComplexAssignment : "^[*\\/\\+\\-]=",
+	TokenType.Assignment        : "^=",
+	TokenType.AdditiveOp        : "^[+\\-]",
+	TokenType.MultiplicativeOp  : "^[*\\/]",
 
 	# Literal
 	TokenType.Number : "\\d+",
@@ -58,7 +65,10 @@ const TokenSpec = \
 	# Statements
 	TokenType.StatementEnd   : "^;",
 	TokenType.StmtBlockStart : "^{",
-	TokenType.StmtBlockEnd   : "^}"
+	TokenType.StmtBlockEnd   : "^}",
+
+	# Symbols
+	TokenType.Identifier : "^\\w+"
 }
 
 class Token:
@@ -142,7 +152,8 @@ const SyntaxNodeType = \
 	BlockStatement           = "BlockStatement",
 	EmptyStatement           = "EmptyStatement",
 	BinaryExpression         = "BinaryExpression",
-	# MultiplicativeExpression = "MultiplicativeExpression"
+	Identifier               = "Identifier",
+	AssignmentExpression     = "AssignmentExpression"
 }
 
 class SyntaxNode:
@@ -205,6 +216,9 @@ class Parser:
 	var TokenizerRef : Tokenizer
 	var NextToken    : Token
 	
+	func is_Literal():
+		return NextToken.Type == TokenType.Number || NextToken.Type == TokenType.String
+	
 	func eat(tokenType):
 		var currToken = self.NextToken
 		
@@ -219,6 +233,19 @@ class Parser:
 		
 		return currToken
 	
+	# Literal
+	#	: NumericLiteral
+	#	: StringLiteral
+	#	;
+	func parse_Literal():
+		match NextToken.Type :
+			TokenType.Number:
+				return parse_NumericLiteral()
+			TokenType.String:
+				return parse_StringLiteral()
+				
+		assert(false, "parse_Literal: Was not able to detect valid literal type from NextToken")
+		
 	# NumericLiteral
 	#	: Number
 	#	;
@@ -242,20 +269,7 @@ class Parser:
 		node.Value = Token.Value.substr( 1, Token.Value.length() - 2 )
 
 		return node
-	
-		# Literal
-	#	: NumericLiteral
-	#	: StringLiteral
-	#	;
-	func parse_Literal():
-		match NextToken.Type :
-			TokenType.Number:
-				return parse_NumericLiteral()
-			TokenType.String:
-				return parse_StringLiteral()
-				
-		assert(false, "parse_Literal: Was not able to detect valid literal type from NextToken")
-	
+
 	# ParenthesizedExpression
 	#	: ( Expression )
 	#	;
@@ -267,17 +281,6 @@ class Parser:
 		eat(TokenType.ExpressionPEnd)
 
 		return expression
-
-	# PrimaryExpression
-	#	: Literal
-	#	| ParenthesizedExpression
-	#	;
-	func parse_PrimaryExpression():
-		match NextToken.Type:
-			TokenType.ExpressionPStart:
-				return parse_ParenthesizedExpression()
-
-		return parse_Literal()
 
 	# MultiplicativeExpression
 	#	: PrimaryExpression
@@ -325,13 +328,83 @@ class Parser:
 			left = nestedNode;
 		
 		return left
-	
-	# Expression
+
+	# Identifier
+	#	: IdentifierSymbol
+	#	;
+	func parse_Identifier():
+		var name = eat(TokenType.Identifier).Value
+
+		var \
+		node = SyntaxNode.new()
+		node.Type = SyntaxNodeType.Identifier
+		node.Value = name
+
+		return node
+
+	# ResolvedSymbol
+	#	: Identiifer
+	#	;
+	func parse_ResolvedSymbol():
+		var resolvedSymbol = parse_Identifier()
+
+		if resolvedSymbol.Type == SyntaxNodeType.Identifier :
+			return resolvedSymbol
+
+		var assertStrTmplt = "parse_ResolvedSymbol: Unexpected symbol: {value}"
+		var assertStr      = assertStrTmplt.format({"value" : resolvedSymbol.Type})
+
+		assert(true != true, assertStr)
+		
+	# PrimaryExpression
 	#	: Literal
+	#	| ParenthesizedExpression
+	#	| ResolvedSymbol
+	#	;
+	func parse_PrimaryExpression():
+		if is_Literal():
+			return parse_Literal()
+
+		match NextToken.Type:
+			TokenType.ExpressionPStart:
+				return parse_ParenthesizedExpression()
+
+		return parse_ResolvedSymbol()
+	
+	# AssignmentExpression
 	#	: AdditiveExpression
+	#	| ResolvedSymbol AssignmentOperator AssignmetnExpression 
+	#	;
+	func parse_AssignmentExpression():
+		var left = parse_AdditiveExpression()
+
+		if NextToken.Type != TokenType.Assignment && NextToken.Type != TokenType.ComplexAssignment :
+			return left
+
+		var assignmentOp;
+
+		if NextToken.Type == TokenType.Assignment :
+			assignmentOp = eat(TokenType.Assignment)
+		elif NextToken.Type == TokenType.ComplexAssignment :
+			assignmentOp = eat(TokenType.ComplexAssignment)
+
+		var \
+		node = SyntaxNode.new()
+		node.Type = SyntaxNodeType.AssignmentExpression
+		node.Value = \
+		[ 
+			assignmentOp.Value, 
+			left,
+			parse_AssignmentExpression()
+		]
+
+		return node
+
+	# Expression
+	#	: AssignmentExpression
 	#	;
 	func parse_Expression():
-		return parse_AdditiveExpression()
+		return parse_AssignmentExpression()
 		
 	# EmptyStatement
 	#	;
@@ -448,6 +521,11 @@ const Tests = \
 	{
 		Name = "Binary Expression",
 		File = "3.BinaryExpression.uf"
+	},
+	Assignment = \
+	{
+		Name = "Assignment",
+		File = "4.Assignment.uf"
 	}
 }
 
