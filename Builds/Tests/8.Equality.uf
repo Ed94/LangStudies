@@ -1,0 +1,7 @@
+x > 0 == true;
+
+x > 0 != false;
+
+x + 5 > 10 == false;
+
+x == null;
