@@ -6,3 +6,23 @@ else
 {
 	x = 2;
 }
+
+
+if ( y )
+{
+	x = 2;
+}
+
+if (a)
+	b = 1;
+
+if (a)
+	if (b)
+
+if (c)
+	if (d)
+	{}
+	else
+	{}
+else
+{}
