@@ -6,3 +6,9 @@ let y = 42;
 
 // Multiple declarations
 let a, b;
+
+let c, d = 10;
+
+let foo = bar = 10;	
+
+r = 10;
