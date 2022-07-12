@@ -6,7 +6,7 @@ if %HH% lss 10 (set CUR_HH=0%time:~1,1%)
 set NN=%time:~3,2%
 set SS=%time:~6,2%
 set MS=%time:~9,2%
-set SUBFILENAME=%YYYY%%MM%%DD%-%HH%%NN%%SS%
+set SUBFILENAME=%YYYY%%MM%%DD%_%HH%%NN%%SS%
 
 cd Builds
 mkdir %SUBFILENAME%
