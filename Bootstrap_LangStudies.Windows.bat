@@ -1,3 +1,8 @@
+
+
+
+
+
 where "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>nul
 if not ERRORLEVEL 0 (
 	echo Visual Studio 2019 not found... Remove this error message if you do have it.
@@ -13,6 +18,7 @@ if not ERRORLEVEL 0 (
 git clone --recurse-submodules https://github.com/Ed94/LangStudies
 
 cd LangStudies
+pause
 
 start build_engine.release.bat
 timeout 10

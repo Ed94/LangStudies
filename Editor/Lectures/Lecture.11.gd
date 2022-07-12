@@ -817,7 +817,7 @@ func test(entry):
 	GTokenizer.init(programDescription)
 	var ast = GParser.parse(GTokenizer)
 	
-	var json = JSON.print(ast.to_SExpression(), '\t')
+	var json = JSON.print(ast.to_Dictionary(), '\t')
 	
 	tout(json + "\n")
 	tout("Passed!\n")
