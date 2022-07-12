@@ -1,0 +1,32 @@
+// While Statement
+while ( x > 10 )
+{
+	x -= 1;
+}
+
+// Do-While Statement
+do 
+{
+	y -= 1;
+} 
+while ( y > 10 );
+
+// For Statement
+for (let index = 0; index < 10; index += 1)
+{
+	x += index;
+}
+
+// For Statement (Optionals)
+for (;;) 
+{}
+
+for (let index = 0, z = 12; index < 10; index += 1)
+{
+	x += index;
+}
+
+for (index = 0; index < 10; index += 1)
+{
+	x += index;
+}
