@@ -1,0 +1,15 @@
+def square(value)
+{
+	return value * value;
+}
+
+def empty() { return; }
+def empty_2() { }
+
+def multi_variable(a, b)
+{
+	return a * b;
+}
+
+// square(2);
+
