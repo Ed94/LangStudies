@@ -45,7 +45,7 @@ const TokenSpec = \
 {
 	# Comments
 	TokenType.CommentLine      : "^\/\/.*",
-	TokenType.CommentMultiLine : "^\/\\*[\\s\\S]*?\\*\/",
+	TokenType.CommentMultiLine : "^\/\\*[\\s\\S]*?\\*\\/",
 
 	# Formatting
 	TokenType.Whitespace : "^\\s+",

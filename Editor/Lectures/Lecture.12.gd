@@ -57,8 +57,8 @@ const TokenType = \
 const TokenSpec = \
 {
 	# Comments
-	TokenType.CommentLine      : "^\/\/.*",
-	TokenType.CommentMultiLine : "^\/\\*[\\s\\S]*?\\*\/",
+	TokenType.CommentLine      : "^\\/\\/.*",
+	TokenType.CommentMultiLine : "^\\/\\*[\\s\\S]*?\\*\\/",
 
 	# Formatting
 	TokenType.Whitespace : "^\\s+",
@@ -68,11 +68,11 @@ const TokenSpec = \
 	TokenType.ExpressionPEnd   : "^\\)",
 
 	# Logical
-	TokenType.Logical_Not  : "^!",
 	TokenType.RelationalOp : "^[>\\<]=?",
 	TokenType.EqualityOp   : "^[=!]=",
 	TokenType.Logical_And  : "^&&",
 	TokenType.Logical_Or   : "^\\|\\|",
+	TokenType.Logical_Not  : "^!",
 
 	# Arithmetic
 	TokenType.ComplexAssignment : "^[*\\/\\+\\-]=",
@@ -830,51 +830,51 @@ func tout(text):
 
 const Tests = \
 {
-	# MultiStatement = \
-	# {
-	# 	Name = "Multi-Statement",
-	# 	File = "1.Multi-Statement.uf"
-	# },
-	# BlockStatement = \
-	# {
-	# 	Name = "Block Statement",
-	# 	File = "2.BlockStatement.uf"
-	# },
-	# BinaryExpression = \
-	# {
-	# 	Name = "Binary Expression",
-	# 	File = "3.BinaryExpression.uf"
-	# },
-	# Assignment = \
-	# {
-	# 	Name = "Assignment",
-	# 	File = "4.Assignment.uf"
-	# },
-	# VaraibleDeclaration = \
-	# {
-	# 	Name = "Variable Declaration",
-	# 	File = "5.VariableDeclaration.uf"
-	# },
-	# Conditionals = \
-	# {
-	# 	Name = "Conditionals",
-	# 	File = "6.Conditionals.uf"
-	# },
-	# Relations = \
-	# {
-	# 	Name = "Relations",
-	# 	File = "7.Relations.uf"
-	# },
-	# Equality = \
-	# {
-	# 	Name = "Equality",
-	# 	File = "8.Equality.uf"
-	# },
-	# Logical = \
-	# {
-	# 	Name = "Logical",
-	# 	File = "9.Logical.uf"
-	# },
+	MultiStatement = \
+	{
+		Name = "Multi-Statement",
+		File = "1.Multi-Statement.uf"
+	},
+	BlockStatement = \
+	{
+		Name = "Block Statement",
+		File = "2.BlockStatement.uf"
+	},
+	BinaryExpression = \
+	{
+		Name = "Binary Expression",
+		File = "3.BinaryExpression.uf"
+	},
+	Assignment = \
+	{
+		Name = "Assignment",
+		File = "4.Assignment.uf"
+	},
+	VaraibleDeclaration = \
+	{
+		Name = "Variable Declaration",
+		File = "5.VariableDeclaration.uf"
+	},
+	Conditionals = \
+	{
+		Name = "Conditionals",
+		File = "6.Conditionals.uf"
+	},
+	Relations = \
+	{
+		Name = "Relations",
+		File = "7.Relations.uf"
+	},
+	Equality = \
+	{
+		Name = "Equality",
+		File = "8.Equality.uf"
+	},
+	Logical = \
+	{
+		Name = "Logical",
+		File = "9.Logical.uf"
+	},
 	Unary = \
 	{
 		Name = "Unary",
