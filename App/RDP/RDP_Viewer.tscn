@@ -7,20 +7,26 @@
 [node name="RDP_Panel" type="Panel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = -9.0
+margin_top = 1.0
+margin_right = -9.0
+margin_bottom = 1.0
 script = ExtResource( 3 )
 
 [node name="CourseBrand" type="TextureRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-rect_scale = Vector2( 0.25, 0.25 )
+rect_scale = Vector2( 0.2, 0.2 )
 texture = ExtResource( 2 )
 expand = true
 stretch_mode = 6
 
 [node name="Tokens_TOut" type="TextEdit" parent="."]
-anchor_left = 0.25
-anchor_right = 0.5
+anchor_left = 0.2
+anchor_right = 0.465
 anchor_bottom = 1.0
+margin_left = 1.2
+margin_right = -0.136017
 grow_horizontal = 0
 theme = ExtResource( 1 )
 readonly = true
@@ -28,9 +34,10 @@ highlight_current_line = true
 show_line_numbers = true
 
 [node name="AST_TOut" type="TextEdit" parent="."]
-anchor_left = 0.5
+anchor_left = 0.465
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = 1.83997
 grow_horizontal = 0
 theme = ExtResource( 1 )
 readonly = true
@@ -51,20 +58,33 @@ window_title = "Open a File"
 mode = 0
 access = 2
 
-[node name="ParseLetterFile_Btn" type="Button" parent="."]
-anchor_top = 0.25
-anchor_right = 0.247
-anchor_bottom = 0.274
-margin_left = 2.0
-margin_right = 0.071991
-margin_bottom = 14.6
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_top = 0.196
+anchor_right = 0.2
+anchor_bottom = 1.0
+margin_top = 2.39999
+margin_right = -1.8
+margin_bottom = -2.0
+
+[node name="ParseLetterFile_Btn" type="Button" parent="VBox"]
+margin_right = 203.0
+margin_bottom = 32.0
+focus_neighbour_top = NodePath("../../CourseBrand")
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.08
 text = "Parse a letter file"
 
-[node name="Back_Btn" type="Button" parent="."]
-anchor_top = 0.95
-anchor_right = 0.247
-anchor_bottom = 0.992
-margin_left = 2.0
-margin_right = 0.071991
-margin_bottom = 2.59998
+[node name="Separator" type="HSeparator" parent="VBox"]
+modulate = Color( 0.145098, 0.145098, 0.164706, 0 )
+margin_top = 36.0
+margin_right = 203.0
+margin_bottom = 441.0
+size_flags_vertical = 15
+
+[node name="Back_Btn" type="Button" parent="VBox"]
+margin_top = 445.0
+margin_right = 203.0
+margin_bottom = 478.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.08
 text = "Course Directory"

@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Parser"
-run/main_scene="res://Persistent.tscn"
+run/main_scene="res://Scenes/Persistent.tscn"
 config/icon="res://Assets/Branding/RDP_Class_cover_small.png"
 
 [autoload]

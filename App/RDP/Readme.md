@@ -1,6 +1,6 @@
 # Building a parser from scratch
 
-[Img](https://i.imgur.com/rEzWwGs.png)
+![Img](https://i.imgur.com/rEzWwGs.png)
 
 ## Lecutres
 

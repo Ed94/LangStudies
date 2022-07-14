@@ -8,8 +8,8 @@ var Parser = preload("Parser.gd").new()
 onready var Tokens_TOut = get_node("Tokens_TOut")
 onready var AST_TOut    = get_node("AST_TOut")
 onready var FDialog     = get_node("Letter_FDialog")
-onready var FD_Btn      = get_node("ParseLetterFile_Btn")
-onready var Back_Btn    = get_node("Back_Btn")
+onready var FD_Btn      = get_node("VBox/ParseLetterFile_Btn")
+onready var Back_Btn    = get_node("VBox/Back_Btn")
 
 
 func tokens_out(text):
