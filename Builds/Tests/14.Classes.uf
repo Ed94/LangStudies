@@ -1,0 +1,32 @@
+class Point
+{
+	def constructor(x, y)
+	{
+		this.x = x;
+		this.y = y;
+	}
+
+	def sum()
+	{
+		return this.x + this.y;
+	}
+}
+
+class Point3D extends Point 
+{
+	def constructor(x, y, z) 
+	{
+		super(x, y);
+		this.z = z;
+	}
+
+	def sum()
+	{
+		return super() + this.z;
+	}
+}
+
+let
+point = new Point(10, 20, 30);
+point.sum();
+
