@@ -5,6 +5,13 @@ if not ERRORLEVEL 0 (
 	exit
 )
 
+where python >nul 2>nul
+if not ERRORLEVEL 0 (
+	echo Need python not found... Remove this error message if you have it.
+	pause
+	exit
+)
+
 where scons >nul 2>nul
 if not ERRORLEVEL 0 (
 	python pip install scons

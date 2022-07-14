@@ -1,0 +1,19 @@
+Symbol.Member;
+
+Symbol.Member = 1;
+
+Symbol.Member[0] = 1;
+
+Symbol.Member.AnotherMember["Something"];
+
+let str   = "Hello World!";
+let index = 0;
+
+while (index < str.Length)
+{
+	str[index];
+	
+	// console.log(index, str[index]);
+
+	index += 1;
+}
