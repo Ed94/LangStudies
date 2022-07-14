@@ -1,3 +1,3 @@
-start Engine\gd\bin\godot.windows.opt.tools.64.exe --path Editor/ 
+start Engine\gd\bin\godot.windows.opt.tools.64.exe --path App/ 
 
 

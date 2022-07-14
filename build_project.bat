@@ -12,4 +12,4 @@ cd Builds
 mkdir %SUBFILENAME%
 
 cd ..\Engine\gd\bin
-godot.windows.opt.64.exe --export "Windows Desktop" "..\Builds\%SUBFILENAME%\LangStudies.exe" --path "..\..\..\Editor"
+godot.windows.opt.64.exe --export "Windows Desktop" "..\Builds\%SUBFILENAME%\LangStudies.exe" --path "..\..\..\App"

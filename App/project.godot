@@ -8,17 +8,25 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Object",
+"class": "Lexer",
+"language": "GDScript",
+"path": "res://RDP/Scripts/Lexer.gd"
+} ]
+_global_script_class_icons={
+"Lexer": ""
+}
+
 [application]
 
 config/name="Parser"
 run/main_scene="res://Persistent.tscn"
-boot_splash/image="res://Assets/Branding/RDP_Class_cover_small.png"
 config/icon="res://Assets/Branding/RDP_Class_cover_small.png"
 
 [autoload]
 
-GScene="*res://Lectures/AST_Viewer.tscn"
-GScript="*res://Lectures/Lecture.18.gd"
+GScene="*res://Scenes/CourseDirectory.tscn"
 
 [gui]
 

@@ -724,7 +724,7 @@ class Parser:
 		return node
 
 	#	> ClassDeclaration
-	# SuperClass
+	# ClassExtension
 	#	: extends Identifier
 	#	;
 	func parse_ClassExtension():
@@ -1256,8 +1256,7 @@ onready var TextOut = GScene.get_node("TextOutput")
 onready var FDialog = GScene.get_node("Letter_FDialog")
 onready var FD_Btn  = GScene.get_node("ParseLetterFile_Btn")
 
-func tout(text):
-	TextOut.insert_text_at_cursor(text)
+
 
 func parse_file(path):
 	var \

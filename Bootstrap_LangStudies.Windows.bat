@@ -30,7 +30,7 @@ if not exist Engine\gd\bin\godot.windows.opt.tools.64.exe (
 ) 
 timeout 10
 
-start Engine\gd\bin\godot.windows.opt.tools.64.exe -e Editor/project.godot
+start Engine\gd\bin\godot.windows.opt.tools.64.exe -e App/project.godot
 timeout 30
 
 taskkill /f /im godot.windows.opt.tools.64.exe
