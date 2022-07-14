@@ -17,8 +17,8 @@ config/icon="res://Assets/Branding/RDP_Class_cover_small.png"
 
 [autoload]
 
-GScene="*res://Lectures/Lecture.tscn"
-GScript="*res://Lectures/Lecture.17.gd"
+GScene="*res://Lectures/AST_Viewer.tscn"
+GScript="*res://Lectures/Lecture.18.gd"
 
 [gui]
 
