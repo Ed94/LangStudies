@@ -13,7 +13,7 @@ while (index < str.Length)
 {
 	str[index];
 	
-	// console.log(index, str[index]);
+	console.log(index, str[index]);
 
 	index += 1;
 }

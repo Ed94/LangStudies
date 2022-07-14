@@ -11,5 +11,5 @@ def multi_variable(a, b)
 	return a * b;
 }
 
-// square(2);
+square(2);
 
