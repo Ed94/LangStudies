@@ -9,7 +9,7 @@ SRegEx: `x y.repeat(0-) | z`
 
 ### Stage 1: Union
 ```
-->o.start				             (o)
+->o.start                            (o)
    \epsilon-> o --xy*-> o -epsilon-->/
    \epsilon-> o --z---> o -epsilon->/
 ```

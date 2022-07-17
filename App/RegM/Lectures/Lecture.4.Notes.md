@@ -1,9 +1,8 @@
 # Basic NFA Fragments
 
 ### Single Character
-RegExp: `/^A$/`
-Psuedo:
-`str.start glyph(A) str.end`
+RegExp: `/^A$/`  
+Psuedo: `start A end`
 
 ^ : Beginning of string	: Str.Start
 $ : End of a string		: Str.End
@@ -13,7 +12,7 @@ Machine:
 
 ### Epsilon-Transition
 RegExp: `/^$/`
-Psuedo: `str.start str.end`
+Psuedo: `start end`
 
 Machine:
 ```
