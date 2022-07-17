@@ -56,7 +56,7 @@ const TokenType : Dictionary = \
 const Spec : Dictionary = \
 {
 	TokenType.fmt_S : "^\\s",
-	TokenType.cmt_SL: "^^\\(\\?\\#.*?\\)",
+	TokenType.cmt_SL: "^(\\(\\?\\#).+(\\))",
 	
 	TokenType.str_start : "^\\bstart\\b",
 	TokenType.str_end   : "^\\bend\\b",

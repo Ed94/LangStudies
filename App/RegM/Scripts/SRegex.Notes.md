@@ -147,6 +147,8 @@ start "null"
 start "this"
 start word.repeat(1-)
 
+
+(?# Url checker with or without http:// or https:// )
 start(
 	http://www\.
 |	https://www\.
@@ -156,17 +158,94 @@ start(
 
 set(a-z 0-9).repeat(1-) 
 
-(
+(   (?# Check for any hypens or dot namespaces )
 	set(\-  \. ).repeat(1)
 	set(a-z 0-9).repeat(1-)
 )
 .repeat(0-)
 
-\.
+(?# Domain name )
+\. set(a-z).repeat(2,5)
 
-set(a-z).repeat(2,5)
-
+(?# Possibly for a port? )
 ( : set(0-9).repeat(1-5) ).repeat(0-1)
 
+(?# I have no idea... )
 ( / \. \*).repeat(0-1)
+end
+
+(?# Validate an IP Address)
+start(
+	
+	(      set(0-9)
+	|	   set(1-9) set(0-9)
+	|	1  set(0-9).repeat(2)
+	|	2  set(0-4) set(0-9)
+	|	25 set(0-5)
+	)
+	\.
+)
+.repeat(3)
+
+(
+	   set(0-9)
+|	   set(1-9)set(0-9)
+|	1  set(0-9).repeat(2)
+|	2  set(0-4) set(0-9)
+|	25 set(0-5)
+)
+end
+
+(?# Match dates (M/D/YY, M/D/YYY, MM/DD/YY, MM/DD/YYYY) )
+start
+(
+	(?# Handle Jan, Mar, May, Jul, Aug, Oct, Dec )
+	( 0.repeat(0-1) set(1 3 5 7 8) | 10 | 12 )
+
+	( \- | / )
+	(	(?# Handle Day )
+		(   set(1-9))
+	|	( 0 set(1-9))
+	|	(   set(1 2)) 
+		(   set(0-9).repeat(0-1))
+	|	( 3 set(0 1).repeat(0-1))
+	)
+
+	( \- | / )
+	(	(?# Handle Year)
+		(19)
+		( set(2-9))
+		( digit.repeat(1) ) 
+	|	(20)
+		( set(0 1))
+		( digit.repeat(1) )
+	|	( set(8 9 0 1))
+		( digit.repeat(1))
+	)
+
+|	(?# Handle Feb, Apr, June, Sept )
+	( 0.repeat(2 4 6 9) | 11 )
+
+	( \- | /)
+	(   (?# Handle Day )
+		(   set(1-9))
+	|	( 0 set(1-9))
+	|	(   set(1 2))
+		(   set(0-9).repeat(0-1))
+	|	( 3 set(0  ).repeat(0-1))
+	)
+
+	( \- | / )
+	(
+		(?# Handle Year)
+		(19)
+		( set(2-9) )
+		( digit.repeat(1) )
+	|	(20)
+		( set(0 1))
+		( digit.repeat(1) )
+	|	( set(8 9 0 1 ))
+		( digit.repeat(1))
+	)
+) 
 end
