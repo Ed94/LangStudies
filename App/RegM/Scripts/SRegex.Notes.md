@@ -146,3 +146,27 @@ start \" !set( \" ).repeat(0-) \"
 start "null"
 start "this"
 start word.repeat(1-)
+
+start(
+	http://www\.
+|	https://www\.
+|	http://
+|	https://
+).repeat(0-1)
+
+set(a-z 0-9).repeat(1-) 
+
+(
+	set(\-  \. ).repeat(1)
+	set(a-z 0-9).repeat(1-)
+)
+.repeat(0-)
+
+\.
+
+set(a-z).repeat(2,5)
+
+( : set(0-9).repeat(1-5) ).repeat(0-1)
+
+( / \. \*).repeat(0-1)
+end

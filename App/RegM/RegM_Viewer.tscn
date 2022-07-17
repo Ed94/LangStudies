@@ -26,8 +26,10 @@ margin_left = 1.2
 margin_right = 0.375977
 grow_horizontal = 0
 theme = ExtResource( 2 )
+readonly = true
 highlight_current_line = true
 show_line_numbers = true
+wrap_enabled = true
 
 [node name="SRegEx_TEdit" type="TextEdit" parent="."]
 anchor_left = 0.525

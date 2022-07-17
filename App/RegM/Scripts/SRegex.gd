@@ -15,6 +15,7 @@ extends Object
 const TokenType : Dictionary = \
 {
 	fmt_S = "Formatting",
+	cmt_SL = "Comment Single Line",
 	
 	str_start = "String Start",
 	str_end   = "String End",
@@ -55,6 +56,7 @@ const TokenType : Dictionary = \
 const Spec : Dictionary = \
 {
 	TokenType.fmt_S : "^\\s",
+	TokenType.cmt_SL: "^^\\(\\?\\#.*?\\)",
 	
 	TokenType.str_start : "^\\bstart\\b",
 	TokenType.str_end   : "^\\bend\\b",
@@ -150,6 +152,12 @@ func tokenize():
 			var result = SpecRegex[type].search( srcLeft )
 			if  result == null || result.get_start() != 0 :
 				continue
+			
+			# Skip Comments
+			if type == TokenType.cmt_SL :
+				Cursor += result.get_string().length()
+				error   = false
+				break
 			
 			# Skip Whitespace
 			if type == TokenType.fmt_S :
