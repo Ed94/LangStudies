@@ -96,8 +96,6 @@ func union_pair(a : NFA, b : NFA):
 
 	return NFA.new(start, accepting)
 
-
-
 func test():
 	var state_1 = State.new(false)
 	var state_2 = State.new(true)

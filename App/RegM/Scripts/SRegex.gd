@@ -12,78 +12,83 @@ extends Object
 
 # Lexer
 
-const TokenType = \
+const TokenType : Dictionary = \
 {
-    fmt_S = "Formatting",
+	fmt_S = "Formatting",
+	
+	str_start = "String Start",
+	str_end   = "String End",
+	
+	glyph_bPOpen  = "\\(",
+	glyph_bPClose = "\\)",
 
-    expr_PStart = "Parenthesis Start",
-    expr_PEnd   = "Parenthesis End",
+	expr_PStart = "Parenthesis Start",
+	expr_PEnd   = "Parenthesis End",
 
-    glyph         = "Glyph",
-    glyph_between = "Glyphs Between",
-    glyph_digit   = "Digit",
-    glyph_inline  = "inline",
-    glyph_word    = "Word",
-    glyph_ws      = "Whitespace",
+	glyph_between = "Glyphs Between",
+	glyph_digit   = "Digit",
+	glyph_inline  = "inline",
+	glyph_word    = "Word",
+	glyph_ws      = "Whitespace",
 
-    glyph_dash    = "-"
-    glyph_dot     = ". dot",
-    glyph_excla   = "! Mark",
-    glyph_vertS   = "|",
-    glyph_bPOpen  = "(",
-    glyph_bPClose = ")",
-    glyph_dQuote  = "\""
+	glyph_dash    = "-",
+	glyph_dot     = ". dot",
+	glyph_excla   = "! Mark",
+	glyph_vertS   = "\\|",
+	glyph_dQuote  = "\"",
 
-    op_lazy   = "Lazy Operator",
-    op_look   = "Lookahead",
-    op_not    = "Not Operator",
-    op_repeat = "Repeating Operator",
-    op_union  = "Union Operator",
+	op_lazy   = "Lazy Operator",
+	op_look   = "Lookahead",
+	op_not    = "Not Operator",
+	op_repeat = "Repeating Operator",
+	op_union  = "Union Operator",
 
-    ref     = "Backreference Group",
-    set     = "Set",
+	ref     = "Backreference Group",
+	set     = "Set",
 
-    str_start = "String Start",
-    str_end   = "String End",
-    string    = "String"
+	string = "String",
+	
+	glyph = "Glyph",
 }
 
-const TokenSpec = \
+const Spec : Dictionary = \
 {
-    TokenType.fmt_S = "^\\s",
+	TokenType.fmt_S : "^\\s",
+	
+	TokenType.str_start : "^\\bstart\\b",
+	TokenType.str_end   : "^\\bend\\b",
 
-	TokenType.string    = "^\"[^\"]*\"",
+	TokenType.string : "^\"[^\"]*\"",
+	
+	TokenType.glyph_bPOpen  : "^\\\\\\(",
+	TokenType.glyph_bPClose : "^\\\\\\)",
 
-    TokenType.expr_PStart = "^\\(",
-    TokenType.expr_PEnd   = "^\\)",
+	TokenType.expr_PStart : "^\\(",
+	TokenType.expr_PEnd   : "^\\)",
 
-    TokenType.glyph_between = "^\\-"
-    TokenType.glyph_digit   = "^\\bdigit\\b",
-    TokenType.glyph_inline  = "^\\binline\\b",
-    TokenType.glyph_word    = "^\\bword\\b",
-    TokenType.glyph_ws      = "^\\bwhitespace\\b",
+	TokenType.glyph_between : "^\\-",
+	TokenType.glyph_digit   : "^\\bdigit\\b",
+	TokenType.glyph_inline  : "^\\binline\\b",
+	TokenType.glyph_word    : "^\\bword\\b",
+	TokenType.glyph_ws      : "^\\bwhitespace\\b",
 
-    TokenType.op_lazy   = "^\\b.lazy\\b",
-    TokenType.op_repeat = "^\\b\\.repeat\\b",
+	TokenType.op_lazy   : "^\\.\\blazy\\b",
+	TokenType.op_repeat : "^\\.\\brepeat\\b",
 
-    TokenType.glyph_dash    = "^\\\-"
-    TokenType.glyph_dot     = "^\\\.",
-    TokenType.glyph_excla   = "^\\\!",
-    TokenType.glyph_vertS   = "^\\\|",
-    TokenType.glyph_bPOpen  = "^\\\(",
-    TokenType.glyph_bPClose = "^\\\)",
-    TokenType.glpyh_dQuote  = "^\\\"",
+	TokenType.glyph_dash    : "^\\\\\\-",
+	TokenType.glyph_dot     : "^\\\\\\.",
+	TokenType.glyph_excla   : "^\\\\\\!",
+	TokenType.glyph_vertS   : "^\\\\\\|",
+	TokenType.glyph_dQuote  : "^\\\\\"",
 
-    TokenType.op_look   = "^\\blook\\b",
-    TokenType.op_not    = "^\\!",
-    TokenType.op_union  = "^\\|",
+	TokenType.op_look   : "^\\blook\\b",
+	TokenType.op_not    : "^\\!",
+	TokenType.op_union  : "^\\|",
 
-    TokenType.ref       = "^\\bbackref\\b",
-    TokenType.set       = "^\\bset\\b",
-    TokenType.str_start = "^\\bstart\\b",
-    TokenType.str_end   = "^\\bend\\b",
+	TokenType.ref       : "^\\bbackref\\b",
+	TokenType.set       : "^\\bset\\b",
 
-    TokenType.glyph     = "^[\\w\\d]"
+	TokenType.glyph     : "^[^\\s]"
 }
 
 
@@ -103,6 +108,7 @@ func compile_regex():
 	for type in TokenType.values() :
 		var \
 		regex = RegEx.new()
+		var _spec = Spec[type]
 		regex.compile( Spec[type] )
 		
 		SpecRegex[type] = regex
@@ -161,7 +167,7 @@ func tokenize():
 			break;
 
 		if error :
-			var assertStrTmplt = "next_token: Source text not understood by tokenizer at Cursor pos: {value} -: {txt}"
+			var assertStrTmplt = "next_Token: Source text not understood by tokenizer at Cursor pos: {value} -: {txt}"
 			var assertStr      = assertStrTmplt.format({"value" : Cursor, "txt" : srcLeft})
 			assert(true != true, assertStr)
 			return
@@ -243,27 +249,27 @@ class ASTNode:
 
 const NodeType = \
 {
-    expression = "Expression",
+	expression = "Expression",
 
-    between = "Glyphs Between Set"
-    capture = "Capture Group",
-    lazy    = "Lazy",
-    look    = "Lookahead",
-    ref     = "Backreference Group",
-    repeat  = "Repeat",
-    set     = "Set",
-    union   = "Union",
+	between = "Glyphs Between Set",
+	capture = "Capture Group",
+	lazy    = "Lazy",
+	look    = "Lookahead",
+	op_not  = "Not Operator",
+	ref     = "Backreference Group",
+	repeat  = "Repeat",
+	set     = "Set",
+	union   = "Union",
 
-    inline        = "Inline",
-    digit         = "Digit",
-    inline        = "Any Inline"
-    word          = "Word",
-    whitespace    = "Whitespace",
-    string        = "String"
-    strStart      = "String Start",
-    strEnd        = "String End",
+	digit         = "Digit",
+	inline        = "Any Inline",
+	word          = "Word",
+	whitespace    = "Whitespace",
+	string        = "String",
+	str_start     = "String Start",
+	str_end       = "String End",
 
-    glyph = "Glyph",
+	glyph = "Glyph",
 }
 
 
@@ -286,26 +292,70 @@ func eat(tokenType):
 	
 	return currToken
 
-func is_Glyph() :
-    match NextToken:
-        TokenType.glyph:
-        TokenType.glyph_digit:
-        TokenType.glyph_inline:
-        TokenType.glyph_word:
-        TokenType.glyph_ws:
-        TokenType.glyph_dash :
-        TokenType.glyph_dot :
-        TokenType.glyph_excla :
-        TokenType.glyph_vertS :
-        TokenType.glyph_bPOpen :
-        TokenType.glyph_bPClose :
-        TokenType.glyph_dQuote :
-            return true
-
-    return false
+func is_Glyph(glyph = NextToken) :
+	match glyph.Type:
+		TokenType.glyph :
+			return true
+		TokenType.glyph_digit :
+			return true
+		TokenType.glyph_inline :
+			return true
+		TokenType.glyph_word :
+			return true
+		TokenType.glyph_ws :
+			return true
+		TokenType.glyph_dash :
+			return true
+		TokenType.glyph_dot :
+			return true
+		TokenType.glyph_excla :
+			return true
+		TokenType.glyph_vertS :
+			return true
+		TokenType.glyph_bPOpen :
+			return true
+		TokenType.glyph_bPClose :
+			return true
+		TokenType.glyph_dQuote :
+			return true
+			
+	return false
 
 func is_GlyphOrStr() :
-    return is_Glyph() || NextToken.Type == TokenType.string
+	return is_Glyph() || NextToken.Type == TokenType.string
+	
+func is_GroupToken() :
+	if NextToken.Value.length() == 2 && NextToken.Value[0] == "\\" :
+		match NextToken.Value[1] :
+			"0" : continue
+			"1" : continue
+			"2" : continue
+			"3" : continue
+			"4" : continue
+			"5" : continue
+			"6" : continue
+			"7" : continue
+			"8" : continue
+			"9" : continue
+			_:
+				return true
+	return false
+	
+func is_RegExToken() :
+	match NextToken.Value :
+		"^" : 
+			return true
+		"$" :
+			return true
+		"*" : 
+			return true
+		"[" :
+			return true
+		"]" : 
+			return true
+		"?" :
+			return true	
+	return
 
 # --------------------------------------------------------------------- HELPERS
 
@@ -314,119 +364,123 @@ func is_GlyphOrStr() :
 # : expression | expression ..
 # | expression
 # ;
-func parse_OpUnion():
-    var expression = parse_Expression(TokenType.union)
+func parse_OpUnion(endToken : Token):
+	var expression = parse_Expression(endToken)
 
-    if NextToken.Type != TokenType.union :
-        return expression
+	if NextToken == null || NextToken.Type != TokenType.union :
+		return expression
 
-    eat(TokenType.op_union)
+	eat(TokenType.op_union)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.union
-    node.Value = [ expression, parse_union() ]
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.union
+	node.Value = [ expression, parse_OpUnion(endToken) ]
 
-    return node
+	return node
 
 #   > Union
 # Expression
 #   : EVERYTHING (Almost)
 #   ;
-func parse_Expression(end_token : Token):
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.Expression
-    node.Value = []
+func parse_Expression(endToken : Token):
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.expression
+	node.Value = []
+	
+	var sentinel = endToken != null
+	if  sentinel :
+		sentinel = NextToken.Type == endToken.Type
 
-    while NextToken != null && NextToken.Type != end_token :
-        match NextToken.Type
-            TokenType.str_start :
-                node.Value.append( parse_StrStart() )
+	while NextToken != null && !sentinel :
+		match NextToken.Type :
+			TokenType.str_start :
+				node.Value.append( parse_StrStart() )
 
-            TokenType.str_end :
-                node.Value.append( parse_StrEnd() )
-               
-            TokenType.expr_PStart :
-                node.Value.append( parse_CaptureGroup() )
+			TokenType.str_end :
+				node.Value.append( parse_StrEnd() )
+			   
+			TokenType.expr_PStart :
+				node.Value.append( parse_CaptureGroup() )
 
-            TokenType.glyph :
-                node.Value.append( parse_Glyph() )
+			TokenType.glyph :
+				node.Value.append( parse_Glyph() )
 
-            TokenType.glyph_digit :
-                node.Value.append( parse_GlyphDigit() )
+			TokenType.glyph_digit :
+				node.Value.append( parse_GlyphDigit() )
 
-            TokenType.glyph_inline :
-                node.Value.append( parse_GlyphInline() )
+			TokenType.glyph_inline :
+				node.Value.append( parse_GlyphInline() )
 
-            TokenType.glyph_word :
-                node.Value.append( parse_GlyphWord() )
+			TokenType.glyph_word :
+				node.Value.append( parse_GlyphWord() )
 
-            TokenType.glyph_ws :
-                node.Value.append( parse_GlyphWhitespace() )
-
-
-            TokenType.glyph_dash :
-                node.Value.append( parse_GlyphDash() )
-
-            TokenType.glyph_dot :
-                node.Value.append( parse_GlyphDot() )
-
-            TokenType.glyph_excla :
-                node.Value.append( parse_GlyphExclamation() )
-
-            TokenType.glyph_vertS :
-                node.Value.append( parse_GlyphVertS() )
-
-            TokenType.glyph_bPOpen :
-                node.Value.append( parse_Glyph_bPOpen() )
-
-            TokenType.glyph_bPClose :
-                node.Value.append( parse_Glyph_bPClose() )
-                
-            TokenType.glyph_dQuote :
-                node.Value.append( parse_Glyph_DQuote() )
+			TokenType.glyph_ws :
+				node.Value.append( parse_GlyphWhitespace() )
 
 
-            TokenType.op_look :
-                node.Value.append( parse_OpLook() )
+			TokenType.glyph_dash :
+				node.Value.append( parse_GlyphDash() )
 
-            TokenType.op_not :
-                node.Value.append( parse_OpNot() )
+			TokenType.glyph_dot :
+				node.Value.append( parse_GlyphDot() )
 
-            TokenType.op_repeat:
-                node.Value.append( parse_OpRepeat() )
+			TokenType.glyph_excla :
+				node.Value.append( parse_GlyphExclamation() )
 
-            TokenType.ref :
-                node.Value.append( parse_Backreference() )
+			TokenType.glyph_vertS :
+				node.Value.append( parse_GlyphVertS() )
 
-            TokenType.set :
-                node.Value.append( parse_Set() )
+			TokenType.glyph_bPOpen :
+				node.Value.append( parse_Glyph_bPOpen() )
 
-            TokenType.string :
-                node.Value.append( parse_String() )
+			TokenType.glyph_bPClose :
+				node.Value.append( parse_Glyph_bPClose() )
+				
+			TokenType.glyph_dQuote :
+				node.Value.append( parse_Glyph_DQuote() )
 
-    return node
+
+			TokenType.op_look :
+				node.Value.append( parse_OpLook() )
+
+			TokenType.op_not :
+				node.Value.append( parse_OpNot() )
+
+			TokenType.op_repeat:
+				node.Value.append( parse_OpRepeat() )
+
+			TokenType.ref :
+				node.Value.append( parse_Backreference() )
+
+			TokenType.set :
+				node.Value.append( parse_Set() )
+
+			TokenType.string :
+				node.Value.append( parse_String() )
+
+	return node
 
 #   > Expression
 func parse_StrStart():
-    eat(TokenType.str_start)
+	eat(TokenType.str_start)
 
-    var \
-    node      = ASTNode.new()
-    node.Type = NodeType.strStart
+	var \
+	node      = ASTNode.new()
+	node.Type = NodeType.str_start
 
-    return node
+	return node
 
 #   > Expression
 func parse_StrEnd():
-    eat(TokenType.str_end)
+	eat(TokenType.str_end)
 
-    var \
-    node      = ASTNode.new()
-    node.Type = NodeType.strEnd
+	var \
+	node      = ASTNode.new()
+	node.Type = NodeType.str_end
 
-    return node
+	return node
 
 #   > Expression
 # Between
@@ -434,178 +488,223 @@ func parse_StrEnd():
 #   | glyph - glyph
 #   ;
 func parse_Between():
-    var glyph = parse_Glyph()
+	var glyph
+	
+	match NextToken.Type :
+		TokenType.glyph :
+			glyph = parse_Glyph()
 
-    if NextToken.Type != TokenType.between :
-        return glyph
+		TokenType.glyph_digit :
+			glyph = parse_GlyphDigit()
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.between
-    node.Value = []
+		TokenType.glyph_inline :
+			glyph =  parse_GlyphInline()
 
-    node.Value.append( glyph )
+		TokenType.glyph_word :
+			glyph =  parse_GlyphWord()
 
-    if NextToken.Type == TokenType.glyph_between:
-        eat(TokenType.glyph_between)
+		TokenType.glyph_ws :
+			glyph = parse_GlyphWhitespace()
 
-        if is_Glyph()
-            node.Value.append( parse_Glyph() )
+		TokenType.glyph_dash :
+			glyph = parse_GlyphDash()
 
-    return node
+		TokenType.glyph_dot :
+			glyph = parse_GlyphDot()
+
+		TokenType.glyph_excla :
+			glyph = parse_GlyphExclamation()
+
+		TokenType.glyph_vertS :
+			glyph = parse_GlyphVertS()
+
+		TokenType.glyph_bPOpen :
+			glyph = parse_Glyph_bPOpen()
+
+		TokenType.glyph_bPClose :
+			glyph = parse_Glyph_bPClose()
+		
+		TokenType.glyph_dQuote :
+			glyph = parse_Glyph_DQuote()
+
+	if NextToken.Type != TokenType.glyph_between :
+		return glyph
+
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.between
+	node.Value = []
+
+	node.Value.append( glyph )
+
+	if NextToken.Type == TokenType.glyph_between:
+		eat(TokenType.glyph_between)
+
+		if is_Glyph() :
+			node.Value.append( parse_Glyph() )
+
+	return node
 
 #   > Expression
 # CaptureGroup
 #   : ( OpUnion )
 #   ;
 func parse_CaptureGroup():
-    eat(TokenType.expr_PStart)
+	eat(TokenType.expr_PStart)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.capture
-    node.Value = parse_union(TokenType.expr_PEnd)
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.capture
+	node.Value = parse_OpUnion(TokenType.expr_PEnd)
 
-    eat(TokenType.expr_PEnd)
+	eat(TokenType.expr_PEnd)
 
-    return node
+	return node
 
 #   > Expression
 #   > Between
 # Glyph
 #   : glyph
 #   ;
-func parse_Glyph():
-    eat(TokenType.glyph)
+func parse_Glyph():	
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.glyph
+	
+	if NextToken.Value == "/" :
+		node.Value = "\\/"
+	elif is_RegExToken() :
+		node.Value = "\\" + NextToken.Value
+	elif is_GroupToken() :
+		node.Value = "\\\\" + NextToken.Value[1] 
+	else : 
+		node.Value = NextToken.Value
+	
+	eat(TokenType.glyph)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.glyph
-    node.Value = NextToken.Value
-
-    return node
+	return node
 
 func parse_GlyphDigit():
-    eat(TokenType.glyph_digit)
+	eat(TokenType.glyph_digit)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.digit
-    node.Value = "\\d"
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.digit
+	node.Value = "\\d"
 
-    return node
+	return node
 
 func parse_GlyphInline():
-    eat(TokenType.glyph_inline)
+	eat(TokenType.glyph_inline)
 
-    var \
-    node = ASTNode.new()
-    node.Type  = NodeType.inline
-    node.Value = "\."
+	var \
+	node = ASTNode.new()
+	node.Type  = NodeType.inline
+	node.Value = "."
 
-    return node
+	return node
 
 func parse_GlyphWord():
-    eat(TokenType.glyph_word)
+	eat(TokenType.glyph_word)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.word
-    node.Value = "\\w"
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.word
+	node.Value = "\\w"
 
-    return node
+	return node
 
 func parse_GlyphWhitespace():
-    eat(TokenType.glyph_ws)
+	eat(TokenType.glyph_ws)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.whitespace
-    node.Value = "\\s"
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.whitespace
+	node.Value = "\\s"
 
-    return node
+	return node
 
 func parse_GlyphDash():
-    eat(TokenType.glyph_dash)
+	eat(TokenType.glyph_dash)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.glyph
-    node.Value = "-"
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.glyph
+	node.Value = "-"
 
-    return node
+	return node
 
 func parse_GlyphDot():
-    eat(TokenType.glyph_dot)
+	eat(TokenType.glyph_dot)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.glyph
-    node.Value = "\\."
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.glyph
+	node.Value = "\\."
 
-    return node
+	return node
 
 func parse_GlyphExclamation():
-    eat(TokenType.glyph_excla)
+	eat(TokenType.glyph_excla)
 
-    var \
-    node       = ASTNode.new()
-    ndoe.Type  = NodeType.glyph
-    node.Value = "\\!"
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.glyph
+	node.Value = "!"
 
-    return node
+	return node
 
 func parse_GlyphVertS():
-    eat(TokenType.glyph_vertS)
+	eat(TokenType.glyph_vertS)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.glyph
-    node.Value = "\\|"
-    
-    return node
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.glyph
+	node.Value = "\\|"
+	
+	return node
 
 func parse_Glyph_bPOpen():
-    eat(TokenType.glyph_bPOpen)
+	eat(TokenType.glyph_bPOpen)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.glyph
-    node.Value = "\\("
-    
-    return node
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.glyph
+	node.Value = "\\("
+	
+	return node
 
 func parse_Glyph_bPClose():
-    eat(TokenType.glyph_bPClose)
+	eat(TokenType.glyph_bPClose)
 
-    var \
-    node = ASTNode.new()
-    node.Type  = NodeType.glyph
-    node.Value = "\\)"
-    
-    return node
+	var \
+	node = ASTNode.new()
+	node.Type  = NodeType.glyph
+	node.Value = "\\)"
+	
+	return node
 
 func parse_Glyph_DQuote():
-    eat(TokenType.glyph_dQuote)
+	eat(TokenType.glyph_dQuote)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.glyph
-    node.Value = "\\\""
-    
-    return node
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.glyph
+	node.Value = "\""
+	
+	return node
 
 #   > Expression
 #   : .lazy
 #   ;
 func parse_OpLazy():
-    eat(TokenType.op_lazy)
+	eat(TokenType.op_lazy)
 
-    var \
-    node      = ASTNode.new()
-    node.Type = NodeType.lazy
+	var \
+	node      = ASTNode.new()
+	node.Type = NodeType.lazy
 
-    return node
+	return node
 
 #   > Expression
 #   > OpNot
@@ -613,12 +712,12 @@ func parse_OpLazy():
 #   : look ( Expression )
 #   ;
 func parse_OpLook():
-    eat(TokenType.op_look)
+	eat(TokenType.op_look)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.look
-    node.Value = parse_CaptureGroup()
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.look
+	node.Value = parse_CaptureGroup()
 
 #   > Expression
 # OpNot
@@ -632,108 +731,123 @@ func parse_OpLook():
 #   | Set
 #   ; 
 func parse_OpNot():
-    eat(TokenType.op_not)
+	eat(TokenType.op_not)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.op_Not
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.op_not
 
-    match NextToken.Type:
-        TokenType.expr_PStart:
-            node.Value = parse_CaptureGroup()
+	match NextToken.Type:
+		TokenType.expr_PStart:
+			node.Value = parse_CaptureGroup()
 
-        TokenType.glyph_digit:
-            node.Value = parse_GlyphDigit()
+		TokenType.glyph_digit:
+			node.Value = parse_GlyphDigit()
 
-        TokenType.glyph_word:
-            node.Value = parse_GlyphWord()
-            
-        TokenType.glyph_ws:
-            node.Value = parse_GlyphWhitespace()
+		TokenType.glyph_word:
+			node.Value = parse_GlyphWord()
+			
+		TokenType.glyph_ws:
+			node.Value = parse_GlyphWhitespace()
 
-        TokenType.look:
-            node.Value = parse_OpLook()
+		TokenType.op_look:
+			node.Value = parse_OpLook()
 
-        TokenType.string:
-            node.Value = parse_String()
+		TokenType.string:
+			node.Value = parse_String()
 
-        TokenType.set:
-            node.Value = parse_Set()
+		TokenType.set:
+			node.Value = parse_Set()
 
-    return node
+	return node
 
 #   > Expression
 # OpRepeat
 #   : .repeat ( opt# optBetween opt# ) opt.lazy
 #   ;
 func parse_OpRepeat():
-    eat(TokenType.op_repeat)
+	eat(TokenType.op_repeat)
 
-    var \
-    node      = ASTNode.new()
-    node.Type = NodeType.repeat
+	var \
+	node      = ASTNode.new()
+	node.Type = NodeType.repeat
 
-    var range = null
-    var lazy  = null
+	var vrange = null
+	var lazy   = null
 
-    eat(TokenType.expr_PStart)
+	eat(TokenType.expr_PStart)
 
-    range = parse_Between()
+	vrange = parse_Between()
 
-    eat(TokenType.expr_PEnd)
+	eat(TokenType.expr_PEnd)
 
-    if NextToken.Type == TokenType.lazy :
-        lazy = parse_OpLazy();
-    
-    node.Value = [ range, lazy ] 
+	if NextToken && NextToken.Type == TokenType.op_lazy :
+		lazy = parse_OpLazy();
+	
+	node.Value = [ vrange, lazy ] 
 
-    return node
+	return node
 
 func parse_Backreference():
-    eat(TokenType.Backreference)
+	eat(TokenType.Backreference)
 
-    var \
-    node      = ASTNode.new()
-    node.Type = NodeType.ref
+	var \
+	node      = ASTNode.new()
+	node.Type = NodeType.ref
 
-    eat(TokenType.expr_PStart)
-    
-    var assertStrTmplt = "Error when parsing a backreference expression: Expected digit but got: {value}"
-	var assertStr      = assertStrTmplt.format({"value" : NextToken.Value)
+	eat(TokenType.expr_PStart)
+	
+	var assertStrTmplt = "Error when parsing a backreference expression: Expected digit but got: {value}"
+	var assertStr      = assertStrTmplt.format({"value" : NextToken.Value})
 
-    assert(NextToken.Type == TokenType.glyph_digit, assertStr)
-    node.Value = NextToken.Value
-    
-    eat(TokenType.expr_PEnd)
+	assert(NextToken.Type == TokenType.glyph_digit, assertStr)
+	node.Value = NextToken.Value
+	
+	eat(TokenType.expr_PEnd)
 
-    return node
+	return node
 
 func parse_Set():
-    eat(TokenType.set)
+	eat(TokenType.set)
 
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.set
-    node.Value = []
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.set
+	node.Value = []
 
-    eat(TokenType.expr_PStart)
+	eat(TokenType.expr_PStart)
 
-    while is_Glyph() :
-        node.Value.append( parse_Between() )
+	while is_Glyph() || NextToken.Type == TokenType.op_not :
+		if NextToken.Type == TokenType.op_not :
+			var possibleGlyph = parse_OpNot()
+			if is_Glyph(possibleGlyph.Value) :
+				node.Value.append( possibleGlyph )
+				continue
+				
+			assert(true == false, "Bad ! operator in set.")
+		
+		node.Value.append( parse_Between() )
 
-    eat(TokenType.expr_PEnd)
+	eat(TokenType.expr_PEnd)
 
-    return node
+	return node
 
 func parse_String():
-    var \
-    node       = ASTNode.new()
-    node.Type  = NodeType.string
-    node.Value = NextToken.Value
+	var string = ""
+	
+	var index = 1
+	while NextToken.Value[index] != "\"" :
+		string += NextToken.Value[index]
+		index += 1
+	
+	var \
+	node       = ASTNode.new()
+	node.Type  = NodeType.string
+	node.Value = string
 
-    eat(TokenType.str)
+	eat(TokenType.string)
 
-    return node
+	return node
 
 # End: Parser
 
@@ -744,175 +858,178 @@ var ExprAST     : ASTNode
 var RegexResult : String
 
 func transpile(expression : String):
-    init( expression )
+	init( expression )
 
-    NextToken = next_token()
-    ExprAST   = parse_union()
+	NextToken = next_Token()
+	ExprAST   = parse_OpUnion(null)
 
-    return transiple_Union(ExprAST)
+	return transiple_Union(ExprAST)
 
 func transiple_Union(node : ASTNode):
-    var result         = String
-    var expressionLeft = node.Value[0]
+	var result         = ""
+	var expressionLeft = node.Value
+	
+	if node.Type == NodeType.union :
+		expressionLeft = node.Value[0]
 
-    for entry in expressionLeft
-        match entry :
-            NodeType.str_start:
-                result += "^"
-            NodeType.str_end:
-                result += "$"
-            
-            NodeType.capture:
-                result += transpile_CaptureGroup(entry, false)
-            NodeType.look:
-                result += transpile_LookAhead(entry, false)
-            NodeType.ref:
-                result += transpile_Backreference(entry)
-            NodeType.repeat:
-                result += transpile_Repeat(entry)
-            NodeType.set:
-                result += transpile_Set(entry, false)
-                
-            NodeType.glyph:
-                result += entry.Value
-            NodeType.glyph_inline:
-                result += entry.Value
-            NodeType.glyph_digit:
-                result += entry.Value
-            NodeType.glyph_word:
-                result += entry.Value
-            NodeType.glyph_ws:
-                result += entry.Value
+	for entry in expressionLeft :
+		match entry.Type :
+			NodeType.str_start:
+				result += "^"
+			NodeType.str_end:
+				result += "$"
+			
+			NodeType.capture:
+				result += transpile_CaptureGroup(entry, false)
+			NodeType.look:
+				result += transpile_LookAhead(entry, false)
+			NodeType.ref:
+				result += transpile_Backreference(entry)
+			NodeType.repeat:
+				result += transpile_Repeat(entry)
+			NodeType.set:
+				result += transpile_Set(entry, false)
+				
+			NodeType.glyph:
+				result += entry.Value
+			NodeType.inline:
+				result += entry.Value
+			NodeType.digit:
+				result += entry.Value
+			NodeType.word:
+				result += entry.Value
+			NodeType.whitespace:
+				result += entry.Value
 
-            NodeType.string:
-                result += transpile_String(entry, false)
-    
-            NodeType.op_not:
-                result += transpile_OpNot(entry)
+			NodeType.string:
+				result += transpile_String(entry, false)
+	
+			NodeType.op_not:
+				result += transpile_OpNot(entry)
 
 
-    if node.Value[1] != null :
-        result += "|"
-        result += transiple_Union(node.Value[1])
+	if node.Type == NodeType.union && node.Value[1] != null :
+		result += "|"
+		result += transiple_Union(node.Value[1])
 
-    return result
-
-func transpile_Between(node : ASTNode):
-    var \
-    result : "["
-    result += node.Value[0]
-    result += node.Value[1]
-    result += "]"
-
-    return result
+	return result
 
 func transpile_CaptureGroup(node : ASTNode, negate : bool):
-    var result = ""
+	var result = ""
 
-    if negate :
-        result += "(?:"
-    else :
-        result += "("
+	if negate :
+		result += "(?:"
+	else :
+		result += "("
 
-    result += transiple_Union(node.Value)
-    result += ")"
+	result += transiple_Union(node.Value)
+	result += ")"
 
-    return result
+	return result
 
 func transpile_LookAhead(node : ASTNode, negate : bool):
-    var result = ""
+	var result = ""
 
-    if negate :
-        result += "(?="
-    else :
-        result += "(?!"
+	if negate :
+		result += "(?="
+	else :
+		result += "(?!"
 
-    result += transiple_Union(node.Value)
-    result += ")"
+	result += transiple_Union(node.Value)
+	result += ")"
+	
+	return result
 
 func transpile_Backreference(node : ASTNode):
-    var \
-    result = "\\"
-    result += node.Value
+	var \
+	result = "\\"
+	result += node.Value
 
-    return result
+	return result
 
-func transpile_Repeat(node : ASTNode)
-    var result = ""
-    var range  = node.Value[0]
-    var lazy   = node.Value[1]
+func transpile_Repeat(node : ASTNode):
+	var result = ""
+	var vrange = node.Value[0]
+	var lazy   = node.Value[1]
 
-    if range.Type == NodeType.between :
-        if range.Value.length() == 1 :
-            if range.Value[0] == "0" :
-                result += "*"
-            if range.Value[0] == "1" :
-                result += "+"
-        if range.Value.length() == 2 :
-            if range.Vlaue[0] == "0" && range.Value[1] == "1" :
-                result += "?"
-            else :
-                result += "{" + range.Value[0] + "," + range.Value[1] + "}"
-    else :
-        result += "{" + range.Value[0] + "}"
+	if vrange.Type == NodeType.between :
+		if vrange.Value.size() == 1 :
+			if vrange.Value[0].Value == "0" :
+				result += "*"
+			if vrange.Value[0].Value == "1" :
+				result += "+"
+		if vrange.Value.size() == 2 :
+			if vrange.Value[0].Value == "0" && vrange.Value[1].Value == "1" :
+				result += "?"
+			else :
+				result += "{" + vrange.Value[0].Value[0] + "," + vrange.Value[0].Value[1] + "}"
+	else :
+		result += "{" + vrange.Value[0] + "}"
 
-    if lazy != null :
-        result += "?"
+	if lazy != null :
+		result += "?"
 
-    return result
+	return result
 
-func transpile_Set(node : ASTNode, negate : bool)
-    var result = ""
+func transpile_Set(node : ASTNode, negate : bool):
+	var result = ""
 
-    if negate :
-        result += "[^"
-    else :
-        result += "["
+	if negate :
+		result += "[^"
+	else :
+		result += "["
 
-    for entry in node.Value :
-        result += entry.Value
+	for entry in node.Value :
+		if entry.Type == NodeType.op_not :
+			result += transpile_OpNot(entry)
+		elif entry.Type == NodeType.between :
+			result += entry.Value[0]
+			result += "-"
+			result += entry.Value[1]	
+		else :		
+			result += entry.Value
 
-    result += "]"
+	result += "]"
 
-    return result
+	return result
 
 func transpile_String(node : ASTNode, negate : bool):
-    var result = ""
+	var result = ""
 
-    if negate :
-        result += "\\B"
-    else :
-        result += "\\b"
+	if negate :
+		result += "\\B"
+	else :
+		result += "\\b"
 
-    result += node.Value
+	result += node.Value
 
-    if negate :
-        result += "\\B"
-    else :
-        result += "\\b"
+	if negate :
+		result += "\\B"
+	else :
+		result += "\\b"
 
-    return result
+	return result
 
 func transpile_OpNot(node : ASTNode):
-    var result = ""
+	var result = ""
 
-    var entry = node.Value
+	var entry = node.Value
 
-    match entry :
-        NodeType.capture:
-            result += transpile_CaptureGroup(entry, true)
-        NodeType.glyph_digit:
-            result += "\\D"
-        NodeType.glyph_word:
-            result += "\\W"
-        NodeType.glyph_ws:
-            result += "\\S"
-        NodeType.glyph_look:
-            result += transpile_LookAhead(entry, true)
-        NodType.string:
-            result += transpile_String(entry, true)
-        NodeType.set:
-            result += transpile_Set(entry, true)
+	match entry.Type :
+		NodeType.capture:
+			result += transpile_CaptureGroup(entry, true)
+		NodeType.digit:
+			result += "\\D"
+		NodeType.word:
+			result += "\\W"
+		NodeType.whitespace:
+			result += "\\S"
+		NodeType.look:
+			result += transpile_LookAhead(entry, true)
+		NodeType.string:
+			result += transpile_String(entry, true)
+		NodeType.set:
+			result += transpile_Set(entry, true)
 
-    return result
+	return result
 

@@ -1,7 +1,7 @@
 ## Concatenation
 
-Regex : `/^AB$/`
-Psuedo: `start str(AB) end`
+Regex : `/^AB$/`  
+Psuedo: `start AB end`  
 
 Machine:
 ```
@@ -12,8 +12,8 @@ Submachine_A --epsilon--> Submachine_B
 
 ## Union
 
-Regex : `/^A|B$/`
-Psuedo: `start glyph(A) | glyph(B) end`
+Regex : `/^A|B$/`  
+Psuedo: `start A | B end`
 
 Machine:
 ```
@@ -26,8 +26,8 @@ Machine:
 
 ## Kleene Closure
 
-Regex : `/^A*$/`
-Psuedo: `start glyph(A).repeating end`
+Regex : `/^A*$/`  
+Psuedo: `start A.repeat(0-) end`
 
 Machine:
 ```

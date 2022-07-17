@@ -1,5 +1,7 @@
 extends Object
 
+var SRegEx = preload("res://RegM/Scripts/SRegex.gd").new()
+
 
 class_name Lexer
 
@@ -118,17 +120,17 @@ const Spec : Dictionary = \
 	#Operators
 
 	# Logical
-	TokenType.op_Relational : "^[>\\<]=?",
+	TokenType.op_Relational : "^[><]=?",
 	TokenType.op_Equality   : "^[=!]=",
 	TokenType.op_LAnd       : "^&&",
 	TokenType.op_LOr        : "^\\|\\|",
 	TokenType.op_LNot       : "^!",
 
 	# Arithmetic
-	TokenType.op_CAssign        : "^[*\\/\\+\\-]=",
+	TokenType.op_CAssign        : "^[\\*\\/+-]=",
 	TokenType.op_Assign         : "^=",
-	TokenType.op_Additive       : "^[+\\-]",
-	TokenType.op_Multiplicative : "^[*\\/]",
+	TokenType.op_Additive       : "^[+-]",
+	TokenType.op_Multiplicative : "^[\\*\\/]",
 
 	# Literals
 	TokenType.literal_BTrue  : "^\\btrue\\b",
@@ -142,11 +144,11 @@ const Spec : Dictionary = \
 	TokenType.sym_Identifier : "^\\w+"
 }
 
-const SSpec : Dictonary =
+const SSpec : Dictionary = \
 {
 	# Comments
-	TokenType.cmt_SL : "start // inline.repeat()",
-	TokenType.cmt_ML : "start /* set(whitespace !whitespace).repeat.lazy */",
+	TokenType.cmt_SL : "start // inline.repeat(0-)",
+	TokenType.cmt_ML : "start /* set(whitespace !whitespace).repeat(0-).lazy */",
 
 	# Formatting
 	TokenType.fmt_S : "start whitespace.repeat(1-)",
@@ -154,7 +156,7 @@ const SSpec : Dictonary =
 	# Delimiters
 	TokenType.delim_Comma : "start ,",
 	TokenType.delim_SMR   : "start \\.",
-	
+
 	# Statements
 	TokenType.def_End    : "start ;",
 	TokenType.def_BStart : "start {",
@@ -176,8 +178,8 @@ const SSpec : Dictonary =
 	TokenType.def_Else   : "start \"else\"",
 
 	# Expressions
-	TokenType.expr_PStart  : "start \(",
-	TokenType.expr_PEnd    : "start \)",
+	TokenType.expr_PStart  : "start \\(",
+	TokenType.expr_PEnd    : "start \\)",
 	TokenType.expr_SBStart : "start [",
 	TokenType.expr_SBEnd   : "start ]",
 	TokenType.expr_New     : "start \"new\"",
@@ -190,20 +192,20 @@ const SSpec : Dictonary =
 	TokenType.op_Relational : "start set(> <) =.repeat(0-1)",
 	TokenType.op_Equality   : "start set(= \\!) =",
 	TokenType.op_LAnd       : "start &&",
-	TokenType.op_LOr        : "start \\\| \\\|",
-	TokenType.op_LNot       : "start \\\!",
+	TokenType.op_LOr        : "start \\| \\|",
+	TokenType.op_LNot       : "start \\!",
 
 	# Arithmetic
-	TokenType.op_CAssign        : "start set(* / + -) =",
+	TokenType.op_CAssign        : "start set(* / + \\-) =",
 	TokenType.op_Assign         : "start =",
-	TokenType.op_Additive       : "start set(+ -)",
+	TokenType.op_Additive       : "start set(+ \\-)",
 	TokenType.op_Multiplicative : "start set(* /)",
 
 	# Literals
 	TokenType.literal_BTrue  : "start \"true\"",
 	TokenType.literal_BFalse : "start \"false\"",
 	TokenType.literal_Number : "start digit.repeat(1-)",
-	TokenType.literal_String : "start \\\" !set( \\\" ).repeat(1-) \\\" ",
+	TokenType.literal_String : "start \\\" !set( \\\" ).repeat(0-) \\\"",
 	TokenType.literal_Null   : "start \"null\"",
 
 	# Symbols
@@ -227,10 +229,15 @@ func compile_regex():
 	for type in TokenType.values() :
 		var \
 		regex = RegEx.new()
-		regex.compile( Spec[type] )
+		
+		var original   = Spec[type]
+		var transpiled = SRegEx.transpile(SSpec[type])
+		
+		assert(transpiled == original, "transpiled did not match original")
+		
+		regex.compile( transpiled )
 		
 		SpecRegex[type] = regex
-#		SpecRegex[type].compile( Spec[type] )
 
 func init(programSrcText):
 	SourceText = programSrcText
