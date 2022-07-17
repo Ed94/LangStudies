@@ -1,5 +1,97 @@
-[gd_scene format=2]
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Assets/Branding/RegM_Class_cover_small.png" type="Texture" id=1]
+[ext_resource path="res://Assets/Styles/EditorTheme.tres" type="Theme" id=2]
+[ext_resource path="res://RegM/Scripts/RegM_Viewer.gd" type="Script" id=3]
 
 [node name="RegM_Panel" type="Panel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme = ExtResource( 2 )
+script = ExtResource( 3 )
+
+[node name="CourseBrand" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_scale = Vector2( 0.2, 0.2 )
+texture = ExtResource( 1 )
+expand = true
+stretch_mode = 6
+
+[node name="RegEx_TEdit" type="TextEdit" parent="."]
+anchor_left = 0.2
+anchor_right = 0.526
+anchor_bottom = 1.0
+margin_left = 1.2
+margin_right = 0.375977
+grow_horizontal = 0
+theme = ExtResource( 2 )
+highlight_current_line = true
+show_line_numbers = true
+
+[node name="SRegEx_TEdit" type="TextEdit" parent="."]
+anchor_left = 0.525
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 1.83997
+grow_horizontal = 0
+theme = ExtResource( 2 )
+highlight_current_line = true
+show_line_numbers = true
+minimap_draw = true
+
+[node name="Letter_FDialog" type="FileDialog" parent="."]
+anchor_left = 0.35
+anchor_top = 0.15
+anchor_right = 0.45
+anchor_bottom = 0.25
+margin_right = 356.0
+margin_bottom = 373.0
+theme = ExtResource( 2 )
+popup_exclusive = true
+window_title = "Open a File"
+mode = 0
+access = 2
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_top = 0.196
+anchor_right = 0.2
+anchor_bottom = 1.0
+margin_top = 2.39999
+margin_right = -1.8
+margin_bottom = -2.0
+
+[node name="ToRegEx_Btn" type="Button" parent="VBox"]
+margin_right = 203.0
+margin_bottom = 30.0
+focus_neighbour_top = NodePath("../../CourseBrand")
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.08
+theme = ExtResource( 2 )
+text = "To RegEx"
+
+[node name="ToSRegEx_Btn" type="Button" parent="VBox"]
+margin_top = 34.0
+margin_right = 203.0
+margin_bottom = 64.0
+focus_neighbour_top = NodePath("../../CourseBrand")
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.08
+theme = ExtResource( 2 )
+disabled = true
+text = "To SRegEx"
+
+[node name="Separator" type="HSeparator" parent="VBox"]
+modulate = Color( 0.145098, 0.145098, 0.164706, 0 )
+margin_top = 68.0
+margin_right = 203.0
+margin_bottom = 443.0
+size_flags_vertical = 15
+
+[node name="Back_Btn" type="Button" parent="VBox"]
+margin_top = 447.0
+margin_right = 203.0
+margin_bottom = 478.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.08
+text = "Course Directory"

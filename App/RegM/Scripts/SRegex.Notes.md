@@ -38,8 +38,111 @@ a?						a.repeat(0-1)
 a{5}					a.repeat(5)
 a{2,}					a.repeat(2-)
 a{1,3}					a.repeat(1-3)
-a{5}					a.repeat.lazy
+a{5}					a.repeat(0-).lazy
 a{2,}?					a.repeat(2-).lazy
 ab|cd					ab | cd
-/^\/\*[\s\S]*?\*\//		start /* set(whitespace !whitespace).lazy.repeat */							
+/^\/\*[\s\S]*?\*\//		start /* set(whitespace !whitespace).repeat(0-).lazy */							
 ```
+
+```
+inline
+word
+digit
+whitespace
+!word
+!digit
+!whitespace
+set(abc)
+!set(abc)
+set(a-g)
+start abc end
+"string"
+!"not this string"
+\- 
+\.
+\!
+\|
+\(
+\)
+\"
+\t
+\n
+\r
+( abc )
+backref(1)
+!( abc )
+look(abc)
+!look(abc)
+a.repeat(0-)
+a.repeat(1-)
+a.repeat(0-1)
+a.repeat(5)
+a.repeat(2-)
+a.repeat(1-3)
+a.repeat(0-).lazy
+a.repeat(2-).lazy
+ab | cd
+
+start whitespace
+start "start"
+start "end"
+start \" !set( \" ).repeat(0-) "\
+start \ \(
+start \ \)
+start \(
+start \)
+start \-
+start "digt"
+start "inline"
+start "word"
+start "whitespace"
+start "lazy"
+start \."repeat"
+start \\ \-
+start \\ \.
+start \\ \!
+start \\ \|
+start \\ \"
+start "look"
+start \!
+start \|
+start "backref"
+start "set"
+start !set(whitespace)
+
+start // inline.repeat(0-)
+start /* set(whitespace !whitespace).repeat(0-).lazy */		start
+start whitespace.repeat(1-)
+start ,
+start \.
+start ;
+start {
+start }
+start "let"
+start "class"
+start "while"
+start "do"
+start "for"
+start "def"
+start "return"
+start "if"
+start "else"
+start "new"
+start "extends"
+start "super"
+start set(> <) =.repeat(0-1)
+start set(= \!) =
+start &&
+start \| \|
+start \!
+start set( * / + \- ) =
+start =
+start set(+ \-)
+start set( * / )
+start "true"
+start "false"
+start digit.repeat(1-)
+start \" !set( \" ).repeat(0-) \"
+start "null"
+start "this"
+start word.repeat(1-)

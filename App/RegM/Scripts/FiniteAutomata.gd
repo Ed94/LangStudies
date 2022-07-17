@@ -11,7 +11,7 @@ class State :
 	func _init(accepting : bool):
 		self.accepting = accepting
 
-		transitionMap[epsilon] = Array.new()
+		transitionMap[epsilon] = []
 
 	func add_Transition(symbol : string, state : State):
 		if symbol == epsilon :
@@ -63,7 +63,7 @@ func glyph(symbol : string):
 
 	return NFA.new(start, accepting)
 
-func repeat(entry : NFA)
+func repeat(entry : NFA):
 	var start     = State.new(false)
 	var accepting = State.new(true)
 

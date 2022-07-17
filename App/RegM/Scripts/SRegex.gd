@@ -364,10 +364,10 @@ func is_RegExToken() :
 # : expression | expression ..
 # | expression
 # ;
-func parse_OpUnion(endToken : Token):
+func parse_OpUnion(endToken):
 	var expression = parse_Expression(endToken)
 
-	if NextToken == null || NextToken.Type != TokenType.union :
+	if NextToken == null || NextToken.Type != TokenType.op_union :
 		return expression
 
 	eat(TokenType.op_union)
@@ -383,17 +383,16 @@ func parse_OpUnion(endToken : Token):
 # Expression
 #   : EVERYTHING (Almost)
 #   ;
-func parse_Expression(endToken : Token):
+func parse_Expression(endToken):
 	var \
 	node       = ASTNode.new()
 	node.Type  = NodeType.expression
 	node.Value = []
-	
-	var sentinel = endToken != null
-	if  sentinel :
-		sentinel = NextToken.Type == endToken.Type
 
-	while NextToken != null && !sentinel :
+	while NextToken != null && NextToken.Type != TokenType.op_union :
+		if endToken != null && NextToken.Type == endToken :
+			break
+			
 		match NextToken.Type :
 			TokenType.str_start :
 				node.Value.append( parse_StrStart() )
@@ -718,6 +717,8 @@ func parse_OpLook():
 	node       = ASTNode.new()
 	node.Type  = NodeType.look
 	node.Value = parse_CaptureGroup()
+	
+	return node
 
 #   > Expression
 # OpNot
@@ -789,7 +790,7 @@ func parse_OpRepeat():
 	return node
 
 func parse_Backreference():
-	eat(TokenType.Backreference)
+	eat(TokenType.ref)
 
 	var \
 	node      = ASTNode.new()
@@ -800,8 +801,9 @@ func parse_Backreference():
 	var assertStrTmplt = "Error when parsing a backreference expression: Expected digit but got: {value}"
 	var assertStr      = assertStrTmplt.format({"value" : NextToken.Value})
 
-	assert(NextToken.Type == TokenType.glyph_digit, assertStr)
+	assert(NextToken.Type == TokenType.glyph, assertStr)
 	node.Value = NextToken.Value
+	eat(TokenType.glyph)
 	
 	eat(TokenType.expr_PEnd)
 
@@ -870,7 +872,8 @@ func transiple_Union(node : ASTNode):
 	var expressionLeft = node.Value
 	
 	if node.Type == NodeType.union :
-		expressionLeft = node.Value[0]
+		expressionLeft = node.Value[0].Value
+		
 
 	for entry in expressionLeft :
 		match entry.Type :
@@ -931,11 +934,11 @@ func transpile_LookAhead(node : ASTNode, negate : bool):
 	var result = ""
 
 	if negate :
-		result += "(?="
-	else :
 		result += "(?!"
+	else :
+		result += "(?="
 
-	result += transiple_Union(node.Value)
+	result += transiple_Union(node.Value.Value)
 	result += ")"
 	
 	return result
@@ -956,13 +959,15 @@ func transpile_Repeat(node : ASTNode):
 		if vrange.Value.size() == 1 :
 			if vrange.Value[0].Value == "0" :
 				result += "*"
-			if vrange.Value[0].Value == "1" :
+			elif vrange.Value[0].Value == "1" :
 				result += "+"
+			else :
+				result += "{" + vrange.Value[0].Value + "," + "}"
 		if vrange.Value.size() == 2 :
 			if vrange.Value[0].Value == "0" && vrange.Value[1].Value == "1" :
 				result += "?"
 			else :
-				result += "{" + vrange.Value[0].Value[0] + "," + vrange.Value[0].Value[1] + "}"
+				result += "{" + vrange.Value[0].Value + "," + vrange.Value[1].Value + "}"
 	else :
 		result += "{" + vrange.Value[0] + "}"
 
@@ -983,9 +988,9 @@ func transpile_Set(node : ASTNode, negate : bool):
 		if entry.Type == NodeType.op_not :
 			result += transpile_OpNot(entry)
 		elif entry.Type == NodeType.between :
-			result += entry.Value[0]
+			result += entry.Value[0].Value
 			result += "-"
-			result += entry.Value[1]	
+			result += entry.Value[1].Value
 		else :		
 			result += entry.Value
 
