@@ -28,6 +28,7 @@ const TokenType : Dictionary = \
 	glyph_between = "Glyphs Between",
 	glyph_digit   = "Digit",
 	glyph_inline  = "inline",
+	glyph_space   = "Space",
 	glyph_word    = "Word",
 	glyph_ws      = "Whitespace",
 
@@ -69,6 +70,7 @@ const Spec : Dictionary = \
 	TokenType.glyph_between : "^\\-",
 	TokenType.glyph_digit   : "^\\bdigit\\b",
 	TokenType.glyph_inline  : "^\\binline\\b",
+	TokenType.glyph_space   : "^\\bspace\\b",
 	TokenType.glyph_word    : "^\\bword\\b",
 	TokenType.glyph_ws      : "^\\bwhitespace\\b",
 
@@ -263,6 +265,7 @@ const NodeType = \
 
 	digit         = "Digit",
 	inline        = "Any Inline",
+	space         = "Space",
 	word          = "Word",
 	whitespace    = "Whitespace",
 	string        = "String",
@@ -341,6 +344,13 @@ func is_GroupToken() :
 				return true
 	return false
 	
+func is_Number() :
+	var \
+	regex = RegEx.new()
+	regex.compile("^\\d")
+	
+	return regex.search(NextToken.Value) != null
+	
 func is_RegExToken() :
 	match NextToken.Value :
 		"^" : 
@@ -411,6 +421,9 @@ func parse_Expression(endToken):
 
 			TokenType.glyph_inline :
 				node.Value.append( parse_GlyphInline() )
+				
+			TokenType.glyph_space :
+				node.Value.append( parse_GlyphSpace() )
 
 			TokenType.glyph_word :
 				node.Value.append( parse_GlyphWord() )
@@ -486,43 +499,32 @@ func parse_StrEnd():
 #   : glyph
 #   | glyph - glyph
 #   ;
-func parse_Between():
+func parse_Between(quantifier : bool = false):
 	var glyph
 	
 	match NextToken.Type :
 		TokenType.glyph :
-			glyph = parse_Glyph()
-
-		TokenType.glyph_digit :
-			glyph = parse_GlyphDigit()
-
+			glyph = parse_Glyph(quantifier)
+#		TokenType.glyph_digit :
+#			glyph = parse_GlyphDigit()
 		TokenType.glyph_inline :
 			glyph =  parse_GlyphInline()
-
-		TokenType.glyph_word :
-			glyph =  parse_GlyphWord()
-
+#		TokenType.glyph_word :
+#			glyph =  parse_GlyphWord()
 		TokenType.glyph_ws :
 			glyph = parse_GlyphWhitespace()
-
 		TokenType.glyph_dash :
 			glyph = parse_GlyphDash()
-
 		TokenType.glyph_dot :
 			glyph = parse_GlyphDot()
-
 		TokenType.glyph_excla :
 			glyph = parse_GlyphExclamation()
-
 		TokenType.glyph_vertS :
 			glyph = parse_GlyphVertS()
-
 		TokenType.glyph_bPOpen :
 			glyph = parse_Glyph_bPOpen()
-
 		TokenType.glyph_bPClose :
-			glyph = parse_Glyph_bPClose()
-		
+			glyph = parse_Glyph_bPClose()		
 		TokenType.glyph_dQuote :
 			glyph = parse_Glyph_DQuote()
 
@@ -540,7 +542,7 @@ func parse_Between():
 		eat(TokenType.glyph_between)
 
 		if is_Glyph() :
-			node.Value.append( parse_Glyph() )
+			node.Value.append( parse_Glyph(quantifier) )
 
 	return node
 
@@ -565,21 +567,27 @@ func parse_CaptureGroup():
 # Glyph
 #   : glyph
 #   ;
-func parse_Glyph():	
+func parse_Glyph(numerical = false):	
 	var \
 	node       = ASTNode.new()
 	node.Type  = NodeType.glyph
 	
-	if NextToken.Value == "/" :
-		node.Value = "\\/"
-	elif is_RegExToken() :
-		node.Value = "\\" + NextToken.Value
-	elif is_GroupToken() :
-		node.Value = "\\\\" + NextToken.Value[1] 
-	else : 
-		node.Value = NextToken.Value
+	node.Value = ""
 	
-	eat(TokenType.glyph)
+	while NextToken.Type == TokenType.glyph :
+		if NextToken.Value == "/" :
+			node.Value += "\\/"
+		elif is_RegExToken() :
+			node.Value += "\\" + NextToken.Value
+		elif is_GroupToken() :
+			node.Value += "\\\\" + NextToken.Value[1] 
+		else : 
+			node.Value += NextToken.Value
+	
+		eat(TokenType.glyph)
+		
+		if numerical == false :
+			break
 
 	return node
 
@@ -601,6 +609,25 @@ func parse_GlyphInline():
 	node.Type  = NodeType.inline
 	node.Value = "."
 
+	return node
+	
+func parse_GlyphSpace():
+	eat(TokenType.glyph_space)
+	
+	var \
+	node = ASTNode.new()
+	node.Type = NodeType.space
+	node.Value = " "
+	
+	if NextToken.Type == TokenType.expr_PStart :
+		eat(TokenType.expr_PStart)
+		
+		var numGlyph = parse_Glyph(true)
+		for n in range(int(numGlyph.Value)) :
+			node.Value += " "
+			
+		eat(TokenType.expr_PEnd)
+	
 	return node
 
 func parse_GlyphWord():
@@ -778,8 +805,8 @@ func parse_OpRepeat():
 
 	eat(TokenType.expr_PStart)
 
-	vrange = parse_Between()
-
+	vrange = parse_Between(true)
+	
 	eat(TokenType.expr_PEnd)
 
 	if NextToken && NextToken.Type == TokenType.op_lazy :
@@ -884,7 +911,7 @@ func transiple_Union(node : ASTNode):
 			
 			NodeType.capture:
 				result += transpile_CaptureGroup(entry, false)
-			NodeType.look:
+			NodeType.look:	
 				result += transpile_LookAhead(entry, false)
 			NodeType.ref:
 				result += transpile_Backreference(entry)
@@ -898,6 +925,8 @@ func transiple_Union(node : ASTNode):
 			NodeType.inline:
 				result += entry.Value
 			NodeType.digit:
+				result += entry.Value
+			NodeType.space:
 				result += entry.Value
 			NodeType.word:
 				result += entry.Value
@@ -969,7 +998,7 @@ func transpile_Repeat(node : ASTNode):
 			else :
 				result += "{" + vrange.Value[0].Value + "," + vrange.Value[1].Value + "}"
 	else :
-		result += "{" + vrange.Value[0] + "}"
+		result += "{" + vrange.Value + "}"
 
 	if lazy != null :
 		result += "?"
