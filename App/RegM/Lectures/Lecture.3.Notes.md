@@ -41,27 +41,27 @@ NFA : Non-deterministic FA - Allos transition on the same symbol to
 different states
 
 ```
-	a->o
+    a->o
    /
 ->o.1---b-->o
    \
-	a->o 
+    a->o 
 ```
 
 epsilon-NFA : Extension of NFA that allows *epsilon* transitions
 
 ```
-	a--->o---epsi--->(o)
-   /		 	    /
+    a--->o---epsi--->(o)
+   /                /
 ->o----b-->epsi--->o
    \
-	a-->o--epsi-->(o)
+    a-->o--epsi-->(o)
 ```
 
 DFA : A state machine which forbids multiple transitions on the same symbol, and *epsilon* transitions
 
 ```
-	a--->o
+    a--->o
    /
 ->o----b-->o
 ```

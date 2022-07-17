@@ -17,11 +17,11 @@ Psuedo: `str.start glyph(A) | glyph(B) str.end`
 
 Machine:
 ```
-	epsilon--> o --A--> o --epsilon
-   /					 		   \
-->o						  			->(o)
-   \					 		   /
-	epsilon--> o --B--> o --epsilon
+    epsilon--> o --A--> o --epsilon
+   /                               \
+->o                                 ->(o)
+   \                               /
+    epsilon--> o --B--> o --epsilon
 ```
 
 ## Kleene Closure
@@ -31,9 +31,9 @@ Psuedo: `str.start glyph(A).repeating str.end`
 
 Machine:
 ```
-				   <------episolon-------
-				  /						 \
+                   <------episolon-------
+                  /                      \
 ->o --epsilon--> o --A--> o --epsilon--> (o)
-   \		  							 /
-	-------------epsilon---------------->
+   \                                     /
+    -------------epsilon---------------->
 ```
