@@ -142,6 +142,74 @@ const Spec : Dictionary = \
 	TokenType.sym_Identifier : "^\\w+"
 }
 
+const SSpec : Dictonary =
+{
+	# Comments
+	TokenType.cmt_SL : "start // inline.repeat()",
+	TokenType.cmt_ML : "start /* set(whitespace !whitespace).repeat.lazy */",
+
+	# Formatting
+	TokenType.fmt_S : "start whitespace.repeat(1-)",
+
+	# Delimiters
+	TokenType.delim_Comma : "start ,",
+	TokenType.delim_SMR   : "start \\.",
+	
+	# Statements
+	TokenType.def_End    : "start ;",
+	TokenType.def_BStart : "start {",
+	TokenType.def_BEnd   : "start }",
+	TokenType.def_Var    : "start \"let\"",
+	TokenType.def_Class  : "start \"class\"",
+
+	# Iteration
+	TokenType.def_While : "start \"while\"",
+	TokenType.def_Do    : "start \"do\"",
+	TokenType.def_For   : "start \"for\"",
+
+	# Procedures
+	TokenType.def_Proc   : "start \"def\"",
+	TokenType.def_Return : "start \"return\"",
+
+	# Conditional
+	TokenType.def_If     : "start \"if\"",
+	TokenType.def_Else   : "start \"else\"",
+
+	# Expressions
+	TokenType.expr_PStart  : "start \(",
+	TokenType.expr_PEnd    : "start \)",
+	TokenType.expr_SBStart : "start [",
+	TokenType.expr_SBEnd   : "start ]",
+	TokenType.expr_New     : "start \"new\"",
+	TokenType.expr_Super   : "start \"super\"",
+	TokenType.expr_Extends : "start \"extends\"",
+
+	#Operators
+
+	# Logical
+	TokenType.op_Relational : "start set(> <) =.repeat(0-1)",
+	TokenType.op_Equality   : "start set(= \\!) =",
+	TokenType.op_LAnd       : "start &&",
+	TokenType.op_LOr        : "start \\\| \\\|",
+	TokenType.op_LNot       : "start \\\!",
+
+	# Arithmetic
+	TokenType.op_CAssign        : "start set(* / + -) =",
+	TokenType.op_Assign         : "start =",
+	TokenType.op_Additive       : "start set(+ -)",
+	TokenType.op_Multiplicative : "start set(* /)",
+
+	# Literals
+	TokenType.literal_BTrue  : "start \"true\"",
+	TokenType.literal_BFalse : "start \"false\"",
+	TokenType.literal_Number : "start digit.repeat(1-)",
+	TokenType.literal_String : "start \\\" !set( \\\" ).repeat(1-) \\\" ",
+	TokenType.literal_Null   : "start \"null\"",
+
+	# Symbols
+	TokenType.sym_This       : "start \"this\"",
+	TokenType.sym_Identifier : "start word.repeat(1-)"
+}
 
 class Token:
 	var Type  : String

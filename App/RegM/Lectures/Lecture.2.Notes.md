@@ -9,7 +9,7 @@ Langauge : A set of strings over a particular alphabet.
 L1(Sigma) = { a, aa, b, ab, ba, bba, .. } (Infinite)
 L2(Sigma) = { aa, bb, ab, ba }; (Length = 2, Finite)
 
-Any time you constraint a langauge you are 
+Any time you constrain a langauge you are 
 defining a formal grammar.
 
 ## Formal Grammars:
