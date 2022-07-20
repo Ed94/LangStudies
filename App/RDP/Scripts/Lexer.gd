@@ -127,9 +127,9 @@ const Spec : Dictionary = \
 	TokenType.op_LNot       : "^!",
 
 	# Arithmetic
-	TokenType.op_CAssign        : "^[\\*\\/+-]=",
+	TokenType.op_CAssign        : "^[\\*\\/+\\-]=",
 	TokenType.op_Assign         : "^=",
-	TokenType.op_Additive       : "^[+-]",
+	TokenType.op_Additive       : "^[+\\-]",
 	TokenType.op_Multiplicative : "^[\\*\\/]",
 
 	# Literals
@@ -231,7 +231,7 @@ func compile_regex():
 		regex = RegEx.new()
 		
 		var original   = Spec[type]
-		var transpiled = SRegEx.transpile(SSpec[type])
+		var transpiled = SRegEx.compile(SSpec[type])
 		
 		assert(transpiled == original, "transpiled did not match original")
 		

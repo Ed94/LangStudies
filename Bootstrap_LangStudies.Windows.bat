@@ -41,4 +41,6 @@ if not exist Engine\gd\bin\godot.windows.opt.64.exe (
     goto :opt_wait
 ) 
 
+timeout 2
+
 start /w build_project.bat

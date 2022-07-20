@@ -664,7 +664,7 @@ func parse_GlyphDash():
 	var \
 	node       = ASTNode.new()
 	node.Type  = NodeType.glyph
-	node.Value = "-"
+	node.Value = "\\-"
 
 	return node
 
@@ -894,22 +894,21 @@ func parse_String():
 var ExprAST     : ASTNode
 var RegexResult : String
 
-func transpile(expression : String):
+func compile(expression : String):
 	init( expression )
 
 	NextToken = next_Token()
 	ExprAST   = parse_OpUnion(null)
 
-	return transiple_Union(ExprAST)
+	return compile_Union(ExprAST)
 
-func transiple_Union(node : ASTNode):
+func compile_Union(node : ASTNode):
 	var result         = ""
 	var expressionLeft = node.Value
 	
 	if node.Type == NodeType.union :
 		expressionLeft = node.Value[0].Value
-		
-
+	
 	for entry in expressionLeft :
 		match entry.Type :
 			NodeType.str_start:
@@ -918,15 +917,15 @@ func transiple_Union(node : ASTNode):
 				result += "$"
 			
 			NodeType.capture:
-				result += transpile_CaptureGroup(entry, false)
+				result += compile_CaptureGroup(entry, false)
 			NodeType.look:	
-				result += transpile_LookAhead(entry, false)
+				result += compile_LookAhead(entry, false)
 			NodeType.ref:
-				result += transpile_Backreference(entry)
+				result += compile_Backreference(entry)
 			NodeType.repeat:
-				result += transpile_Repeat(entry)
+				result += compile_Repeat(entry)
 			NodeType.set:
-				result += transpile_Set(entry, false)
+				result += compile_Set(entry, false)
 				
 			NodeType.glyph:
 				result += entry.Value
@@ -942,19 +941,18 @@ func transiple_Union(node : ASTNode):
 				result += entry.Value
 
 			NodeType.string:
-				result += transpile_String(entry, false)
+				result += compile_String(entry, false)
 	
 			NodeType.op_not:
-				result += transpile_OpNot(entry)
-
+				result += compile_OpNot(entry)
 
 	if node.Type == NodeType.union && node.Value[1] != null :
 		result += "|"
-		result += transiple_Union(node.Value[1])
+		result += compile_Union(node.Value[1])
 
 	return result
 
-func transpile_CaptureGroup(node : ASTNode, negate : bool):
+func compile_CaptureGroup(node : ASTNode, negate : bool):
 	var result = ""
 
 	if negate :
@@ -962,12 +960,12 @@ func transpile_CaptureGroup(node : ASTNode, negate : bool):
 	else :
 		result += "("
 
-	result += transiple_Union(node.Value)
+	result += compile_Union(node.Value)
 	result += ")"
 
 	return result
 
-func transpile_LookAhead(node : ASTNode, negate : bool):
+func compile_LookAhead(node : ASTNode, negate : bool):
 	var result = ""
 
 	if negate :
@@ -975,19 +973,19 @@ func transpile_LookAhead(node : ASTNode, negate : bool):
 	else :
 		result += "(?="
 
-	result += transiple_Union(node.Value.Value)
+	result += compile_Union(node.Value.Value)
 	result += ")"
 	
 	return result
 
-func transpile_Backreference(node : ASTNode):
+func compile_Backreference(node : ASTNode):
 	var \
 	result = "\\"
 	result += node.Value
 
 	return result
 
-func transpile_Repeat(node : ASTNode):
+func compile_Repeat(node : ASTNode):
 	var result = ""
 	var vrange = node.Value[0]
 	var lazy   = node.Value[1]
@@ -1013,7 +1011,7 @@ func transpile_Repeat(node : ASTNode):
 
 	return result
 
-func transpile_Set(node : ASTNode, negate : bool):
+func compile_Set(node : ASTNode, negate : bool):
 	var result = ""
 
 	if negate :
@@ -1023,7 +1021,7 @@ func transpile_Set(node : ASTNode, negate : bool):
 
 	for entry in node.Value :
 		if entry.Type == NodeType.op_not :
-			result += transpile_OpNot(entry)
+			result += compile_OpNot(entry)
 		elif entry.Type == NodeType.between :
 			result += entry.Value[0].Value
 			result += "-"
@@ -1035,7 +1033,7 @@ func transpile_Set(node : ASTNode, negate : bool):
 
 	return result
 
-func transpile_String(node : ASTNode, negate : bool):
+func compile_String(node : ASTNode, negate : bool):
 	var result = ""
 
 	if negate :
@@ -1052,14 +1050,14 @@ func transpile_String(node : ASTNode, negate : bool):
 
 	return result
 
-func transpile_OpNot(node : ASTNode):
+func compile_OpNot(node : ASTNode):
 	var result = ""
 
 	var entry = node.Value
 
 	match entry.Type :
 		NodeType.capture:
-			result += transpile_CaptureGroup(entry, true)
+			result += compile_CaptureGroup(entry, true)
 		NodeType.digit:
 			result += "\\D"
 		NodeType.word:
@@ -1067,10 +1065,10 @@ func transpile_OpNot(node : ASTNode):
 		NodeType.whitespace:
 			result += "\\S"
 		NodeType.look:
-			result += transpile_LookAhead(entry, true)
+			result += compile_LookAhead(entry, true)
 		NodeType.string:
-			result += transpile_String(entry, true)
+			result += compile_String(entry, true)
 		NodeType.set:
-			result += transpile_Set(entry, true)
+			result += compile_Set(entry, true)
 
 	return result

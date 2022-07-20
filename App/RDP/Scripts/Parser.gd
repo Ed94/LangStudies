@@ -1035,7 +1035,6 @@ func parse_StringLiteral():
 
 	return node
 
-
 #	> Literal
 # BooleanLiteral
 #	: true
