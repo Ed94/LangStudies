@@ -1,0 +1,15 @@
+[gd_resource type="Theme" load_steps=5 format=2]
+
+[ext_resource path="res://Assets/Styles/Editor.Wine.SytleBoxFlat.tres" type="StyleBox" id=1]
+[ext_resource path="res://Assets/Fonts/DF_RecMonoSemiCasul.tres" type="DynamicFont" id=2]
+[ext_resource path="res://Assets/Styles/Editor.SytleBoxFlat.Inactive.tres" type="StyleBox" id=3]
+[ext_resource path="res://Assets/Styles/Editor.DarkWine.SytleBoxFlat.tres" type="StyleBox" id=4]
+
+[resource]
+Button/styles/disabled = ExtResource( 3 )
+Panel/styles/panel = ExtResource( 1 )
+TextEdit/colors/font_color = Color( 1, 1, 1, 1 )
+TextEdit/colors/font_color_readonly = Color( 1, 1, 1, 1 )
+TextEdit/fonts/font = ExtResource( 2 )
+TextEdit/styles/normal = ExtResource( 4 )
+TextEdit/styles/read_only = ExtResource( 4 )

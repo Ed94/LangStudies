@@ -257,7 +257,7 @@ class ASTNode:
 		}
 		return result
 
-const NodeType = \
+const NodeType : Dictionary = \
 {
 	expression = "Expression",
 
@@ -1074,4 +1074,3 @@ func transpile_OpNot(node : ASTNode):
 			result += transpile_Set(entry, true)
 
 	return result
-

@@ -10,17 +10,23 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Object",
+"class": "Eva",
+"language": "GDScript",
+"path": "res://EoI/Scripts/Eva.gd"
+}, {
+"base": "Object",
 "class": "Lexer",
 "language": "GDScript",
 "path": "res://RDP/Scripts/Lexer.gd"
 } ]
 _global_script_class_icons={
+"Eva": "",
 "Lexer": ""
 }
 
 [application]
 
-config/name="Parser"
+config/name="LangStudies"
 run/main_scene="res://Scenes/Persistent.tscn"
 config/icon="res://Assets/Branding/RDP_Class_cover_small.png"
 
