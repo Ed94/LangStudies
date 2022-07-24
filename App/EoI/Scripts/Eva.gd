@@ -25,10 +25,16 @@ var   Env    : EvaEnv
 var Parent
 # ---------------------------------------------------------- GLOBALS END
 
+func get_class():
+	return "Eva"
+
 func _init(parent, evalOut):
 	EvalOut = evalOut
 	Env     = EvaEnv.new(EvalOut)
 	Parent  = parent
+	
+	if Parent == null:
+		Env.setup_Globals()
 
 func eval( ast ):
 	match ast.type():
@@ -47,7 +53,7 @@ func eval( ast ):
 		NType.block :
 			return eval_Block( ast )
 
-		NType.conditional:
+		NType.conditional :
 			var condition = eval( ast.arg(1) )
 
 			if condition:
@@ -58,40 +64,41 @@ func eval( ast ):
 			if ast.num_args() > 2:
 				return eval( ast.arg(3))
 				
-		NType.expr_While:
+		NType.expr_While :
 			var result
 			
 			while eval( ast.arg(1) ):
 				result = eval( ast.arg(2) )
 				
 			return result
+			
+		NType.fn_User :
+			var symbol = ast.arg(1)
+			var fnDef  = \
+			[ 
+				ast.arg(2), # Parameters
+				ast.arg(3), # Body
+				self        # Closure (Environment capture)
+			]
+			
+			Env.define(symbol, fnDef)
+			return Env.lookup(symbol)
 	
 		NType.identifier :
-			var identifier = ast.arg(1)
-		
-			if Parent != null && !Env.has( identifier):
-				return Parent.Env.lookup( identifier )
-		
-			return Env.lookup( identifier )
+			return eval_Lookup( ast )
 		
 		NType.op_Assign :
-			var symbol = ast.arg(1)
-			var value  = eval( ast.arg(2) )
+			return eval_Assign( ast )
 			
-			if Parent != null && !Env.has( symbol):
-				return Parent.Env.set( symbol, value )
-			
-			return Env.set( symbol, value )
+		NType.op_Fn:
+			return eval_Func( ast )
 
 		NType.op_Greater:
 			return eval( ast.arg(1) ) > eval( ast.arg(2) )
-
 		NType.op_Lesser:
 			return eval( ast.arg(1) ) < eval( ast.arg(2) )
-
 		NType.op_GreaterEqual:
 			return eval( ast.arg(1) ) >= eval( ast.arg(2) )
-
 		NType.op_LesserEqual:
 			return eval( ast.arg(1) ) <= eval( ast.arg(2) )
 			
@@ -100,10 +107,14 @@ func eval( ast ):
 	
 		NType.variable :
 			var symbol = ast.arg(1)
-			var value  = eval( ast.arg(2) )
-
-			Env.define_Var(symbol, value)
-			return value
+			var value
+			
+			if ast.num_args() == 2:
+				value = eval( ast.arg(2) )
+				
+			Env.define(symbol, value)
+			
+			return Env.lookup(symbol)
 	
 	if ast.is_Number() : 	
 		return float( ast.arg(1) )		
@@ -125,6 +136,44 @@ func eval_Block( ast ):
 
 	return result
 
+func eval_Lookup( ast ) :
+	var identifier = ast.arg(1)
+		
+	if Parent != null && !Env.has( identifier):
+		return Parent.eval_Lookup( ast )
+		
+	return Env.lookup( identifier )
+	
+func eval_Assign( ast, oriEva = null ) :
+	var symbol = ast.arg(1)
+	
+	if Parent != null && !Env.has( symbol):
+		return Parent.eval_Assign( ast, self )
+	
+	var value
+	
+	if oriEva != null :
+		value = oriEva.eval( ast.arg(2) )
+	else :
+		value = eval( ast.arg(2) )
+	
+	return Env.set( symbol, value )
+	
+func eval_Func( ast ):
+	var fn     = eval_Lookup( ast )
+	var params = fn[0]
+	var body   = fn[1]
+	var fnEva  = get_script().new( fn[2], EvalOut )
+	
+	if params.type() != NType.empty:
+		var index = 1
+		while index <= params.num_args():
+			var paramVal = eval( ast.arg(index + 1) )
+			fnEva.Env.define(params.arg(index), paramVal )
+			index += 1
+			
+	return fnEva.eval( body )
+
 func eval_Numeric( ast ):
 	if ast.type() == NType.op_Add:
 		var result  = 0.0; var index = 1
@@ -136,6 +185,9 @@ func eval_Numeric( ast ):
 		return result
 		
 	if ast.type() == NType.op_Sub:
+		if ast.num_args() == 2:
+			return -eval( ast.arg(1) )
+		
 		var result = 0.0; var index = 1
 		
 		while index <= ast.num_args():
@@ -171,9 +223,11 @@ func eval_Print( ast ):
 	return null
 	
 func get_EnvSnapshot():
-	var snapshot = Env.Records.duplicate(true)
+	var \
+	snapshot         = EvaEnv.new(EvalOut)
+	snapshot.Records = Env.Records.duplicate(true)
 	
 	if Parent != null:
-		snapshot[Parent] = Parent.Env.Records.duplicate(true)
+		snapshot[Parent] = Parent.get_EnvSnapshot()
 		
-	return snapshot
+	return snapshot.to_Dictionary()

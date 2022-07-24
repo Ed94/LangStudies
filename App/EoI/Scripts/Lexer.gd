@@ -24,12 +24,13 @@ const TType : Dictionary = \
 	cmt_SL = "Comment Single-Line",
 	cmt_ML = "Comment Multi-Line",
 	
-	def_Block = "Expression Block Start",
 	def_Start = "Expression Start",
 	def_End   = "Expression End",
+	def_Block = "Expression Block Start",
 	def_Cond  = "Expression Conditional",
 	def_While = "Expression While",
 	def_Var   = "Variable Declaration",
+	def_Func  = "Function Declaration",
 	
 	literal_Number = "Literal: Number",
 	literal_String = "Literal: String",
@@ -50,12 +51,13 @@ const Spec : Dictionary = \
 	
 	TType.fmt_S : "start whitespace.repeat(1-).lazy",
 
-	TType.def_Block : "start \"begin\"",
 	TType.def_Start : "start \\(",
 	TType.def_End   : "start \\)",
+	TType.def_Block : "start \"begin\"",
 	TType.def_Cond  : "start \"if\"",
 	TType.def_While : "start \"while\"",
 	TType.def_Var   : "start \"var\"",
+	TType.def_Func  : "start \"def\"",
 	
 	TType.literal_Number : \
 	"""start 

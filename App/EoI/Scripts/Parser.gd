@@ -21,6 +21,8 @@ const NType = \
 {
 	program = "Program",
 	
+	empty = "Empty",
+	
 	block = "Scope Block",
 
 	conditional = "Conditional",
@@ -30,6 +32,7 @@ const NType = \
 	literal_String = "Literal: String",
 	
 	op_Assign = "Assignment",
+	op_Fn     = "Function Call",
 	
 	op_Add     = "+",
 	op_Sub     = "-",
@@ -42,9 +45,11 @@ const NType = \
 	op_LesserEqual  = "<=",
 	
 	fn_Print = "Print",
+	fn_User  = "User Function",
+	fn_Params = "Function Parameters",
 
 	identifier = "Identifier",
-	variable = "Variable"
+	variable   = "Variable"
 }
 
 class ASTNode:
@@ -163,6 +168,8 @@ func parse_Expression():
 			node = parse_While()
 		TType.def_Var:
 			node = parse_Variable()
+		TType.def_Func:
+			node = parse_fn_User()
 		TType.fn_Print:
 			node = parse_fn_Print()
 		TType.op_Assgin:
@@ -171,7 +178,8 @@ func parse_Expression():
 			node = parse_op_Numeric()
 		TType.op_Relational:
 			node = parse_op_Relational()
-
+		TType.identifier:
+			node = parse_op_Fn()
 	
 	var arg = 1
 	while NextToken.Type != TType.def_End:
@@ -183,6 +191,10 @@ func parse_Expression():
 			node.add_Expr( parse_Literal() )
 		
 	eat(TType.def_End)
+	
+	if node == null:
+		node = ASTNode.new()
+		node.set_Type(NType.empty)
 	
 	return node
 
@@ -221,12 +233,41 @@ func parse_Variable():
 	
 	node.add_TokenValue( NextToken )
 	eat(TType.identifier)
-	
-	if NextToken.Type == TType.def_Start :
-		node.add_Expr( parse_Expression() )
 		
-	else :
-		node.add_Expr( parse_Literal() )
+	return node
+	
+func parse_fn_User():
+	var \
+	node = ASTNode.new()
+	node.set_Type(NType.fn_User)
+	eat(TType.def_Func)
+	
+	check( NextToken.Type == TType.identifier,
+		String("Parser - parse_op_Assign: NextToken should have been identifier, Type: {type} Value: {value}") \
+		.format({"type" : NextToken.Type, "value" : NextToken.Value })
+	)
+	
+	node.add_TokenValue( NextToken )
+	eat(TType.identifier)
+	
+	# Parameters
+	var \
+	pNode = ASTNode.new()
+	pNode.set_Type(NType.fn_Params)
+	eat(TType.def_Start)
+	
+	while NextToken.Type != TType.def_End:
+		check( NextToken.Type == TType.identifier,
+			String("Parser - parse_op_Assign: NextToken should have been identifier, Type: {type} Value: {value}") \
+			.format({"type" : NextToken.Type, "value" : NextToken.Value })
+		)
+		
+		pNode.add_TokenValue(NextToken)
+		eat(TType.identifier)
+		
+	eat(TType.def_End)
+	
+	node.add_Expr( pNode )
 		
 	return node
 	
@@ -306,6 +347,15 @@ func parse_op_Relational():
 
 	return node
 	
+func parse_op_Fn():
+	var \
+	node = ASTNode.new()
+	node.set_Type(NType.op_Fn)
+	node.add_TokenValue( NextToken )
+	eat(TType.identifier)
+	
+	return node
+
 func parse_Literal():
 	var node = ASTNode.new()
 	
