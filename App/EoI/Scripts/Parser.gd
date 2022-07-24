@@ -44,9 +44,12 @@ const NType = \
 	op_Lesser       = "<",
 	op_LesserEqual  = "<=",
 	
-	fn_Print = "Print",
-	fn_User  = "User Function",
+	fn_Print  = "Print",
+	fn_User   = "User Function",
+	fn_Lambda = "Lambda Function",
+	fn_IIL    = "Lambda Function Immediate Invocation",
 	fn_Params = "Function Parameters",
+	fn_Body   = "Function Body",
 
 	identifier = "Identifier",
 	variable   = "Variable"
@@ -54,6 +57,10 @@ const NType = \
 
 class ASTNode:
 	var Data : Array
+	
+	func get_class() :
+		return "ASTNode"
+	
 	
 	func add_Expr( expr ):
 		Data.append(expr)
@@ -99,8 +106,11 @@ class ASTNode:
 				result.append( array_Serialize( entry, fn_objSerializer ))
 
 			elif typeof(entry) == TYPE_OBJECT :
-				fn_objSerializer.set_instance(entry)
-				result.append( fn_objSerializer.call_func() )
+				if entry.get_class() ==  "Eva":
+					result.append(entry)
+				else:
+					fn_objSerializer.set_instance(entry)
+					result.append( fn_objSerializer.call_func() )
 
 			else :
 				result.append( entry )
@@ -151,7 +161,7 @@ func parse():
 			node.add_Expr( parse_Identifier() )
 	
 		elif NextToken.is_Literal():
-			node.Add_Expr( parse_Literal() )
+			node.add_Expr( parse_Literal() )
 	
 	return node
 	
@@ -170,6 +180,8 @@ func parse_Expression():
 			node = parse_Variable()
 		TType.def_Func:
 			node = parse_fn_User()
+		TType.def_Lambda:
+			node = parse_fn_Lambda()
 		TType.fn_Print:
 			node = parse_fn_Print()
 		TType.op_Assgin:
@@ -180,6 +192,8 @@ func parse_Expression():
 			node = parse_op_Relational()
 		TType.identifier:
 			node = parse_op_Fn()
+		TType.def_Start:
+			node = parse_fn_IIL()
 	
 	var arg = 1
 	while NextToken.Type != TType.def_End:
@@ -267,10 +281,63 @@ func parse_fn_User():
 		
 	eat(TType.def_End)
 	
+	var \
+	bNode = ASTNode.new()
+	bNode.set_Type(NType.fn_Body)
+	
+	while NextToken.Type != TType.def_End:
+		bNode.add_Expr( parse_Expression() )
+	
 	node.add_Expr( pNode )
+	node.add_Expr( bNode )
+	
+	return node
+	
+func parse_fn_Lambda():
+	var \
+	node = ASTNode.new()
+	node.set_Type(NType.fn_Lambda)
+	eat(TType.def_Lambda)
+	
+	# Parameters
+	var \
+	pNode = ASTNode.new()
+	pNode.set_Type(NType.fn_Params)
+	eat(TType.def_Start)
+	
+	while NextToken.Type != TType.def_End:
+		check( NextToken.Type == TType.identifier,
+			String("Parser - parse_op_Assign: NextToken should have been identifier, Type: {type} Value: {value}") \
+			.format({"type" : NextToken.Type, "value" : NextToken.Value })
+		)
+		
+		pNode.add_TokenValue(NextToken)
+		eat(TType.identifier)
+		
+	eat(TType.def_End)
+	
+	var \
+	bNode = ASTNode.new()
+	bNode.set_Type(NType.fn_Body)
+	
+	while NextToken.Type != TType.def_End:
+		bNode.add_Expr( parse_Expression() )
+	
+	node.add_Expr( pNode )
+	node.add_Expr( bNode )
 		
 	return node
 	
+func parse_fn_IIL():
+	var \
+	node = ASTNode.new()
+	node.set_Type(NType.fn_IIL)
+	
+	# Lambda
+	node.add_Expr( parse_Expression() )
+	
+	return node
+
 func parse_Identifier():
 	var \
 	node = ASTNode.new()

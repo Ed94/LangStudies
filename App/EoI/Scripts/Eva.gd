@@ -46,6 +46,9 @@ func eval( ast ):
 				
 			var result = eval( ast.arg(index) )
 			if result != null:
+				if typeof(result) == TYPE_OBJECT && result.get_class() == "ASTNode":
+					return JSON.print(result.to_SExpression())
+					
 				return String( result )
 			else:
 				return null
@@ -83,6 +86,37 @@ func eval( ast ):
 			
 			Env.define(symbol, fnDef)
 			return Env.lookup(symbol)
+			
+		NType.fn_Lambda:
+			var fnDef  = \
+			[ 
+				ast.arg(1), # Parameters
+				ast.arg(2), # Body
+				self        # Closure (Environment capture)
+			]
+			
+			return fnDef
+			
+		NType.fn_IIL:
+			var params = ast.arg(1).arg(1)
+			var body   = ast.arg(1).arg(2)
+			var fnEva  = get_script().new( self, EvalOut )
+			
+			if params.type() != NType.empty:
+				var index = 1
+				while index <= params.num_args():
+					var paramVal = eval( ast.arg(index + 1) )
+					fnEva.Env.define(params.arg(index), paramVal )
+					index += 1
+			
+			var result
+
+			var index = 1;
+			while index <= body.num_args() :
+				result = fnEva.eval( body.arg( index ) )
+				index += 1
+	
+			return result
 	
 		NType.identifier :
 			return eval_Lookup( ast )
@@ -164,7 +198,7 @@ func eval_Func( ast ):
 	var params = fn[0]
 	var body   = fn[1]
 	var fnEva  = get_script().new( fn[2], EvalOut )
-	
+
 	if params.type() != NType.empty:
 		var index = 1
 		while index <= params.num_args():
@@ -172,7 +206,14 @@ func eval_Func( ast ):
 			fnEva.Env.define(params.arg(index), paramVal )
 			index += 1
 			
-	return fnEva.eval( body )
+	var result
+
+	var index = 1;
+	while index <= body.num_args() :
+		result = fnEva.eval( body.arg( index ) )
+		index += 1
+	
+	return result
 
 func eval_Numeric( ast ):
 	if ast.type() == NType.op_Add:
