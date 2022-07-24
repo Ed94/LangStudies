@@ -23,15 +23,23 @@ const NType = \
 	
 	block = "Scope Block",
 
+	conditional = "Conditional",
+	expr_While  = "Expression While",
+
 	literal_Number = "Literal: Number",
 	literal_String = "Literal: String",
 	
 	op_Assign = "Assignment",
 	
-	op_Add  = "+",
-	op_Sub  = "-",
-	op_Mult = "*",
-	op_Div  = "/",
+	op_Add     = "+",
+	op_Sub     = "-",
+	op_Mult    = "*",
+	op_Div     = "/",
+	
+	op_Greater      = ">",
+	op_GreaterEqual = ">=",
+	op_Lesser       = "<",
+	op_LesserEqual  = "<=",
 	
 	fn_Print = "Print",
 
@@ -149,6 +157,10 @@ func parse_Expression():
 	match NextToken.Type :
 		TType.def_Block:
 			node = parse_Block()
+		TType.def_Cond:
+			node = parse_ConditionalIf()
+		TType.def_While:
+			node = parse_While()
 		TType.def_Var:
 			node = parse_Variable()
 		TType.fn_Print:
@@ -157,6 +169,9 @@ func parse_Expression():
 			node = parse_op_Assign()
 		TType.op_Numeric:
 			node = parse_op_Numeric()
+		TType.op_Relational:
+			node = parse_op_Relational()
+
 	
 	var arg = 1
 	while NextToken.Type != TType.def_End:
@@ -177,6 +192,20 @@ func parse_Block():
 	node.set_Type(NType.block)
 	eat(TType.def_Block)
 
+	return node
+	
+func parse_ConditionalIf():
+	var \
+	node = ASTNode.new()
+	node.set_Type(NType.conditional)
+	eat(TType.def_Cond)
+	return node
+	
+func parse_While():
+	var \
+	node = ASTNode.new()
+	node.set_Type(NType.expr_While)
+	eat(TType.def_While)
 	return node
 	
 func parse_Variable():
@@ -242,7 +271,7 @@ func parse_op_Assign():
 		node.add_Expr( parse_Expression() )
 
 	return node
-	
+
 func parse_op_Numeric():
 	var node = ASTNode.new()
 	
@@ -258,6 +287,23 @@ func parse_op_Numeric():
 			
 	eat(TType.op_Numeric)
 	
+	return node
+	
+func parse_op_Relational():
+	var node = ASTNode.new()
+
+	match NextToken.Value:
+		NType.op_Greater:
+			node.set_Type(NType.op_Greater)
+		NType.op_Lesser:
+			node.set_Type(NType.op_Lesser)
+		NType.op_GreaterEqual:
+			node.set_Type(NType.op_GreaterEqual)
+		NType.op_LesserEqual:
+			node.set_Type(NType.op_LesserEqual)
+
+	eat(TType.op_Relational)
+
 	return node
 	
 func parse_Literal():
@@ -283,3 +329,4 @@ func _init(lexer, errorOut) :
 	Lexer    = lexer
 	
 	NextToken = Lexer.next_Token()
+	

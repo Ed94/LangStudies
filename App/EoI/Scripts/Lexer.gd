@@ -27,13 +27,16 @@ const TType : Dictionary = \
 	def_Block = "Expression Block Start",
 	def_Start = "Expression Start",
 	def_End   = "Expression End",
-	def_Var   = "Variable",
+	def_Cond  = "Expression Conditional",
+	def_While = "Expression While",
+	def_Var   = "Variable Declaration",
 	
 	literal_Number = "Literal: Number",
 	literal_String = "Literal: String",
 	
-	op_Assgin  = "Assignment",
-	op_Numeric = "op_Numeric",
+	op_Assgin     = "Assignment",
+	op_Numeric    = "op_Numeric",
+	op_Relational = "op_Relational",
 	
 	fn_Print = "Print",
 	
@@ -50,6 +53,8 @@ const Spec : Dictionary = \
 	TType.def_Block : "start \"begin\"",
 	TType.def_Start : "start \\(",
 	TType.def_End   : "start \\)",
+	TType.def_Cond  : "start \"if\"",
+	TType.def_While : "start \"while\"",
 	TType.def_Var   : "start \"var\"",
 	
 	TType.literal_Number : \
@@ -60,8 +65,9 @@ const Spec : Dictionary = \
 	""",
 	TType.literal_String : "start \\\" !set( \\\" ).repeat(0-) \\\" ",
 	
-	TType.op_Assgin  : "start \"set\"",
-	TType.op_Numeric : "start set(+ \\- * /)",
+	TType.op_Assgin     : "start \"set\"",
+	TType.op_Numeric    : "start set(+ \\- * /)",
+	TType.op_Relational : "start set(> <) =.repeat(0-1)",
 	
 	TType.fn_Print : "start \"print\"",
 	
