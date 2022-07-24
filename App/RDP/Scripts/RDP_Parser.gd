@@ -1,5 +1,7 @@
 extends Object
 
+class_name RDP_Parser
+
 const NodeType = \
 {
 	program = "Program",
@@ -108,9 +110,9 @@ class PNode:
 
 
 
-var SLexer    : Script = preload("res://RDP/Scripts/Lexer.gd")
+var SLexer    : Script = preload("res://RDP/Scripts/RDP_Lexer.gd")
 var TokenType = SLexer.TokenType
-var NextToken : Lexer.Token
+var NextToken : RDP_Lexer.Token
 var Lexer
 
 

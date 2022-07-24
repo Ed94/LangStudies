@@ -15,13 +15,37 @@ _global_script_classes=[ {
 "path": "res://EoI/Scripts/Eva.gd"
 }, {
 "base": "Object",
+"class": "EvaEnv",
+"language": "GDScript",
+"path": "res://EoI/Scripts/EvaEnv.gd"
+}, {
+"base": "Object",
 "class": "Lexer",
 "language": "GDScript",
-"path": "res://RDP/Scripts/Lexer.gd"
+"path": "res://EoI/Scripts/Lexer.gd"
+}, {
+"base": "Object",
+"class": "Parser",
+"language": "GDScript",
+"path": "res://EoI/Scripts/Parser.gd"
+}, {
+"base": "Object",
+"class": "RDP_Lexer",
+"language": "GDScript",
+"path": "res://RDP/Scripts/RDP_Lexer.gd"
+}, {
+"base": "Object",
+"class": "RDP_Parser",
+"language": "GDScript",
+"path": "res://RDP/Scripts/RDP_Parser.gd"
 } ]
 _global_script_class_icons={
 "Eva": "",
-"Lexer": ""
+"EvaEnv": "",
+"Lexer": "",
+"Parser": "",
+"RDP_Lexer": "",
+"RDP_Parser": ""
 }
 
 [application]

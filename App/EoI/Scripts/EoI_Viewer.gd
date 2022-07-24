@@ -1,40 +1,47 @@
 extends Node
 
-var eva = preload("Eva.gd").new()
 
+# Eva -------------------------------------------------------
+const SLexer = preload("Lexer.gd")
+var   Lexer  : SLexer
 
+const SParser = preload("Parser.gd")
+var   Parser  : SParser
 
-
-
-
-
-
-
-
-
-
+const SEva = preload("Eva.gd")
+var   Eva : SEva
 
 
 # UX --------------------------------------------------------
-onready var Editor   = get_node("Editor_TEdit")
-onready var Output   = get_node("Output_TEdit")
-onready var Debug    = get_node("Debug_TEdit")
-onready var Eva_Btn  = get_node("VBox/Eva_Interpret_Btn")
-onready var Back_Btn = get_node("VBox/Back_Btn")
+onready var Editor    = get_node("Editor_TEdit")
+onready var Output    = get_node("Output_TEdit")
+onready var Debug     = get_node("Debug_TEdit")
+onready var Eva_Btn   = get_node("VBox/Eva_Interpret_Btn")
+onready var Clear_Btn = get_node("VBox/ClearOutput_Btn")
+onready var Back_Btn  = get_node("VBox/Back_Btn")
 
 
 func evaBtn_pressed():
-	eva.init(Editor.text, Output)
+	Lexer  = SLexer.new(Editor.text, Output)
+	Parser = SParser.new(Lexer, Output)
+	Eva    = SEva.new(null, Output)
 	
-	var ast = eva.parse()
+	var ast    = Parser.parse()
+	var result = Eva.eval(ast)
 	
-	Output.text = eva.eval(ast)
-	Debug.text = JSON.print(eva.Records, "\t")
-
+	if result != null:
+		Output.text += "\nResult: " + result
+	
+	Debug.text = JSON.print( Eva.get_EnvSnapshot(), "\t" )
+	
+func clearBtn_pressed():
+	Output.text = ""
+ 
 func backBtn_pressed():
 	queue_free()
 
 
 func _ready():
 	Eva_Btn.connect("pressed", self, "evaBtn_pressed")
+	Clear_Btn.connect("pressed", self, "clearBtn_pressed")
 	Back_Btn.connect("pressed", self, "backBtn_pressed")

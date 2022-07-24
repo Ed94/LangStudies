@@ -1,8 +1,8 @@
 extends Panel
 
 
-var Lexer  = preload("Lexer.gd").new()
-var Parser = preload("Parser.gd").new()
+var Lexer  = preload("RDP_Lexer.gd").new()
+var Parser = preload("RDP_Parser.gd").new()
 
 
 onready var Tokens_TOut = get_node("Tokens_TOut")

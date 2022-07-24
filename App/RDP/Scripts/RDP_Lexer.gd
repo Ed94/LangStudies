@@ -3,7 +3,7 @@ extends Object
 var SRegEx = preload("res://RegM/Scripts/SRegex.gd").new()
 
 
-class_name Lexer
+class_name RDP_Lexer
 
 
 const TokenType : Dictionary = \
