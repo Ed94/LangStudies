@@ -43,6 +43,8 @@ const NType = \
 	op_GreaterEqual = ">=",
 	op_Lesser       = "<",
 	op_LesserEqual  = "<=",
+	op_Equal        = "=",
+	op_NotEqual     = "!=",
 	
 	fn_Print  = "Print",
 	fn_User   = "User Function",
@@ -190,6 +192,14 @@ func parse_Expression():
 			node = parse_op_Numeric()
 		TType.op_Relational:
 			node = parse_op_Relational()
+		TType.op_Equality:
+			node = ASTNode.new()
+			match NextToken.Value:
+				NType.op_Equal:
+					node.set_Type(NType.op_Equal)
+				NType.op_NotEqual:
+					node.set_Type(NType.op_NotEqual)
+			eat(TType.op_Equality)
 		TType.identifier:
 			node = parse_op_Fn()
 		TType.def_Start:

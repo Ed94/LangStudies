@@ -37,8 +37,9 @@ const TType : Dictionary = \
 	literal_String = "Literal: String",
 	
 	op_Assgin     = "Assignment",
-	op_Numeric    = "op_Numeric",
-	op_Relational = "op_Relational",
+	op_Numeric    = "Numeric Operation",
+	op_Relational = "Relational Operation",
+	op_Equality   = "Equality Operation",
 	
 	fn_Print = "Print",
 	
@@ -72,6 +73,7 @@ const Spec : Dictionary = \
 	TType.op_Assgin     : "start \"set\"",
 	TType.op_Numeric    : "start set(+ \\- * /)",
 	TType.op_Relational : "start set(> <) =.repeat(0-1)",
+	TType.op_Equality   : "start \\!.repeat(0-1) =",
 	
 	TType.fn_Print : "start \"print\"",
 	

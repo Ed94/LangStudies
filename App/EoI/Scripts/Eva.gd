@@ -136,6 +136,11 @@ func eval( ast ):
 		NType.op_LesserEqual:
 			return eval( ast.arg(1) ) <= eval( ast.arg(2) )
 			
+		NType.op_Equal:
+			return eval( ast.arg(1) ) == eval( ast.arg(2) )
+		NType.op_NotEqual:
+			return eval( ast.arg(1) ) != eval( ast.arg(2) )
+			
 		NType.fn_Print :
 			return eval_Print( ast )
 	
@@ -226,10 +231,10 @@ func eval_Numeric( ast ):
 		return result
 		
 	if ast.type() == NType.op_Sub:
-		if ast.num_args() == 2:
+		if ast.num_args() < 2:
 			return -eval( ast.arg(1) )
 		
-		var result = 0.0; var index = 1
+		var result = eval( ast.arg(1) ); var index = 2
 		
 		while index <= ast.num_args():
 			result -= eval( ast.arg(index) )
@@ -247,11 +252,11 @@ func eval_Numeric( ast ):
 		return result
 			
 	if ast.type() == NType.op_Div:
-		var result = 1.0; var index = 1
+		var result = eval( ast.arg(1) ); var index = 2
 		
 		while index <= ast.num_args():
 			result /= eval( ast.arg(index) )
-			result += 1
+			index += 1
 			
 		return result
 			
