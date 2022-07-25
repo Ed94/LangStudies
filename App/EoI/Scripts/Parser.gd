@@ -26,7 +26,9 @@ const NType = \
 	block = "Scope Block",
 
 	conditional = "Conditional",
+	expr_Switch = "Expression Switch",
 	expr_While  = "Expression While",
+	expr_For    = "Expression For",
 
 	literal_Number = "Literal: Number",
 	literal_String = "Literal: String",
@@ -34,10 +36,12 @@ const NType = \
 	op_Assign = "Assignment",
 	op_Fn     = "Function Call",
 	
-	op_Add     = "+",
-	op_Sub     = "-",
-	op_Mult    = "*",
-	op_Div     = "/",
+	op_Add       = "+",
+	op_Sub       = "-",
+	op_Mult      = "*",
+	op_Div       = "/",
+	op_Increment = "++",
+	op_Decrement = "--",
 	
 	op_Greater      = ">",
 	op_GreaterEqual = ">=",
@@ -63,7 +67,6 @@ class ASTNode:
 	func get_class() :
 		return "ASTNode"
 	
-	
 	func add_Expr( expr ):
 		Data.append(expr)
 		
@@ -82,12 +85,24 @@ class ASTNode:
 	func type():
 		return Data[0]
 		
+	func is_op_Relation():
+		match type():
+			NType.op_Greater: return true
+			NType.op_Lesser: return true
+			NType.op_GreaterEqual: return true
+			NType.op_LesserEqual: return true
+			NType.op_Equal: return true
+			NType.op_NotEqual: return true
+			_: return false
+	
 	func is_op_Numeric():
 		match type():
 			NType.op_Add: return true
 			NType.op_Sub: return true
 			NType.op_Mult: return true
 			NType.op_Div: return true
+			NType.op_Increment: return true
+			NType.op_Decrement: return true
 			_: return false
 		
 	func is_Number():
@@ -173,11 +188,15 @@ func parse_Expression():
 	
 	match NextToken.Type :
 		TType.def_Block:
-			node = parse_Block()
+			node = parse_Simple(TType.def_Block, NType.block)
 		TType.def_Cond:
-			node = parse_ConditionalIf()
+			node = parse_Simple(TType.def_cond, NType.conditional)
+		TType.def_Switch:
+			node = parse_Switch()
 		TType.def_While:
-			node = parse_While()
+			node = parse_Simple(TType.def_While, NType.expr_While)
+		TType.def_For:
+			node = parse_Simple(TType.def_For, NType.expr_For)
 		TType.def_Var:
 			node = parse_Variable()
 		TType.def_Func:
@@ -185,7 +204,7 @@ func parse_Expression():
 		TType.def_Lambda:
 			node = parse_fn_Lambda()
 		TType.fn_Print:
-			node = parse_fn_Print()
+			node = parse_Simple(TType.fn_Print, NType.fn_Print)
 		TType.op_Assgin:
 			node = parse_op_Assign()
 		TType.op_Numeric:
@@ -205,7 +224,6 @@ func parse_Expression():
 		TType.def_Start:
 			node = parse_fn_IIL()
 	
-	var arg = 1
 	while NextToken.Type != TType.def_End:
 		if NextToken.Type == TType.def_Start:
 			node.add_Expr( parse_Expression() ) 
@@ -222,26 +240,20 @@ func parse_Expression():
 	
 	return node
 
-func parse_Block():
+func parse_Simple(tType, nType):
 	var \
 	node = ASTNode.new()
-	node.set_Type(NType.block)
-	eat(TType.def_Block)
+	node.set_Type(nType)
+	eat(tType)
 
 	return node
-	
-func parse_ConditionalIf():
+
+func parse_Switch():
 	var \
 	node = ASTNode.new()
-	node.set_Type(NType.conditional)
-	eat(TType.def_Cond)
-	return node
-	
-func parse_While():
-	var \
-	node = ASTNode.new()
-	node.set_Type(NType.expr_While)
-	eat(TType.def_While)
+	node.set_Type(NType.expr_Switch)
+	eat(TType.def_Switch)
+
 	return node
 	
 func parse_Variable():
@@ -358,15 +370,6 @@ func parse_Identifier():
 	
 	return node
 	
-func parse_fn_Print():
-	var \
-	node = ASTNode.new()
-	node.set_Type(NType.fn_Print)
-	
-	eat(TType.fn_Print)
-	
-	return node
-	
 func parse_op_Assign():
 	var \
 	node = ASTNode.new()
@@ -402,6 +405,10 @@ func parse_op_Numeric():
 			node.set_Type(NType.op_Mult)
 		NType.op_Div:
 			node.set_Type(NType.op_Div)
+		NType.op_Increment:
+			node.set_Type(NType.op_Increment)
+		NType.op_Decrement:
+			node.set_Type(NType.op_Decrement)
 			
 	eat(TType.op_Numeric)
 	

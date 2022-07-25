@@ -1,3 +1,4 @@
 {
-	"editor.formatOnType": true
+	"editor.formatOnType": true,
+	"godot_tools.editor_path": "p:\\Study\\LangStudies\\Engine\\gd\\bin\\godot.windows.opt.tools.64.exe"
 }

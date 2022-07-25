@@ -43,7 +43,7 @@ func clearBtn_pressed():
  
 func backBtn_pressed():
 	queue_free()
-	
+
 
 func _ready():
 	Eva        = SEva.new(null, Output)

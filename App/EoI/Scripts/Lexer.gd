@@ -28,7 +28,9 @@ const TType : Dictionary = \
 	def_End    = "Expression End",
 	def_Block  = "Expression Block Start",
 	def_Cond   = "Expression Conditional",
+	def_Switch = "Expresssion Switch",
 	def_While  = "Expression While",
+	def_For    = "Expression For",
 	def_Var    = "Variable Declaration",
 	def_Func   = "Function Declaration",
 	def_Lambda = "Lambda Declaration",
@@ -57,7 +59,9 @@ const Spec : Dictionary = \
 	TType.def_End    : "start \\)",
 	TType.def_Block  : "start \"begin\"",
 	TType.def_Cond   : "start \"if\"",
+	TType.def_Switch : "start \"switch\"",
 	TType.def_While  : "start \"while\"",
+	TType.def_For    : "start \"for\"",
 	TType.def_Var    : "start \"var\"",
 	TType.def_Func   : "start \"def\"",
 	TType.def_Lambda : "start \"lambda\"",
@@ -71,7 +75,7 @@ const Spec : Dictionary = \
 	TType.literal_String : "start \\\" !set( \\\" ).repeat(0-) \\\" ",
 	
 	TType.op_Assgin     : "start \"set\"",
-	TType.op_Numeric    : "start set(+ \\- * /)",
+	TType.op_Numeric    : "start set(+ \\- * /) set(+ \\-).repeat(0-1)",
 	TType.op_Relational : "start set(> <) =.repeat(0-1)",
 	TType.op_Equality   : "start \\!.repeat(0-1) =",
 	
